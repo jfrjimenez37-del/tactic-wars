@@ -233,6 +233,43 @@ func reach(u: TWUnit) -> Dictionary:
 	return ends
 
 
+## Camino que sigue la unidad hasta dest (para animarlo). Mismo recorrido que reach, guardando de dónde
+## se llega a cada casilla. No interviene en las reglas.
+func path_to(u: TWUnit, dest: Vector2i) -> Array:
+	var k: int = R.UNIT[u.t][1]
+	var mov: int = R.UNIT[u.t][3]
+	var best := {u.pos: 0}
+	var parent := {}
+	var pq := [[0, u.pos]]
+	while pq.size() > 0:
+		var item := _pop_min(pq)
+		var d: int = item[0]
+		var p: Vector2i = item[1]
+		if d > best[p]:
+			continue
+		if p != u.pos and terrain[p] == "r":
+			continue
+		for q in R.neighbors(p):
+			var c := move_cost(q, k)
+			if c < 0 or d + c > mov:
+				continue
+			var other = at(q)
+			if other != null and other.side != u.side:
+				continue
+			if terrain[q] == "r" and other != null:
+				continue
+			if d + c < best.get(q, 99):
+				best[q] = d + c
+				parent[q] = p
+				pq.append([d + c, q])
+	if not parent.has(dest):
+		return [u.pos, dest]
+	var path := [dest]
+	while path[0] != u.pos:
+		path.push_front(parent[path[0]])
+	return path
+
+
 func distances(sources: Array, mclass: int) -> Dictionary:
 	var d := {}
 	var pq := []

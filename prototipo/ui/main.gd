@@ -6,6 +6,7 @@ const R = preload("res://core/tw_rules.gd")
 const BoardView = preload("res://ui/board_view.gd")
 const SetupScreen = preload("res://ui/setup_screen.gd")
 const BoardCamera = preload("res://ui/board_camera.gd")
+const Sfx = preload("res://ui/sfx.gd")
 const FONT := 21              # tamaño de letra base (legible en el móvil)
 const PANEL_W := 420
 const TURN_TIME := 25.0       # C13: 25 s por turno y 60 s de reserva por partida
@@ -18,6 +19,14 @@ var camera: Control           # BoardCamera
 var top_label: Label
 var clock_label: Label
 var clock_on := false
+var sfx: Node
+var sound_button: Button
+var anim := true              # animar las acciones (las pruebas rápidas lo desactivan)
+var busy := false             # hay una animación en marcha: no se aceptan toques
+var ending := false           # se está pasando el turno (hasta que empieza el siguiente)
+var last_tick := -1
+var anim_max := 0.0           # animación más larga hasta ahora, en segundos a velocidad normal (pruebas)
+var anim_count := 0
 var turn_left := TURN_TIME
 var reserve := [RESERVE_TIME, RESERVE_TIME]
 var info_label: Label
@@ -57,6 +66,11 @@ func _ready() -> void:
 	for a in args:
 		if a.begins_with("--demo=") or a == "--autoplay" or a.begins_with("--select="):
 			quick = true
+	for a in args:
+		if a.begins_with("--demo="):
+			anim = false
+		if a == "--autoplay" or a.begins_with("--setup-test="):
+			board.speed = 3.0
 	if quick:
 		_new_game()
 	else:
@@ -73,6 +87,9 @@ func _ready() -> void:
 	for a in args:
 		if a.begins_with("--select="):
 			_on_cell(R.cell(a.substr(9)))
+	for a in args:
+		if a.begins_with("--anim-shot="):
+			await _anim_shot(a.substr(12), args)
 	for a in args:
 		if a.begins_with("--shot="):
 			await get_tree().process_frame
@@ -107,6 +124,16 @@ func _build_ui() -> void:
 	clock_label = Label.new()
 	clock_label.add_theme_font_size_override("font_size", FONT + 4)
 	top.add_child(clock_label)
+	sound_button = Button.new()
+	sound_button.text = "Sonido: sí"
+	sound_button.focus_mode = Control.FOCUS_NONE
+	sound_button.custom_minimum_size = Vector2(150, 0)
+	sound_button.pressed.connect(func():
+		sfx.enabled = not sfx.enabled
+		sound_button.text = "Sonido: sí" if sfx.enabled else "Sonido: no")
+	top.add_child(sound_button)
+	sfx = Sfx.new()
+	add_child(sfx)
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 8)
@@ -353,6 +380,8 @@ func _fill_cards() -> void:
 
 # ------------------------------------------------------------------ interacción
 func _on_cell(p: Vector2i) -> void:
+	if busy or ending:
+		return
 	if phase == "deploy":
 		_deploy_cell(p)
 		return
@@ -375,6 +404,7 @@ func _on_cell(p: Vector2i) -> void:
 		if mode == "unit" and sel_unit == u.id and game.owner.has(p):
 			_select_building(p)
 			return
+		sfx.play("select")
 		mode = "unit"
 		sel_unit = u.id
 		sel_cell = null
@@ -432,11 +462,159 @@ func _start_dismount(sub: String) -> void:
 func _do(a: Dictionary) -> void:
 	var who: String = SIDE_NAME[game.current].split(" ")[1]
 	var label := action_label(a)
+	var pre := _snapshot()
+	var path := []
+	if a.unit >= 0 and a.dest != null and (a.kind == "activate" or a.sub == "marcha") and game.units[a.unit].pos != null \
+			and a.dest != game.units[a.unit].pos:
+		path = game.path_to(game.units[a.unit], a.dest)
 	game.events = []
 	game.apply(a)
+	var evs := game.events.duplicate()
 	history.append("%s: %s" % [who, label])
 	_report_events()
 	_reset_selection()
+	if anim and phase == "play":
+		_animate(a, evs, pre, path)
+
+
+## Copia de las unidades antes de una acción (para animar las que se mueven, mueren o salen de un vehículo).
+func _snapshot() -> Dictionary:
+	var out := {}
+	for u in game.units.values():
+		var c := TWUnit.new(u.id, u.side, u.t, u.pos, u.hp)
+		c.crew = u.crew
+		c.char_id = u.char_id
+		c.veteran = u.veteran
+		c.carrier = u.carrier
+		out[u.id] = c
+	return out
+
+
+func _idle() -> void:
+	while busy:
+		await get_tree().process_frame
+
+
+## Anima una acción ya aplicada a partir de sus sucesos: movimiento, disparos, daño, explosiones, capturas
+## y cartas. Dura como mucho 3 s (sec. 9 del reglamento): si hay muchos sucesos, se acelera.
+func _animate(a: Dictionary, evs: Array, pre: Dictionary, path: Array) -> void:
+	busy = true
+	var t_start := Time.get_ticks_msec()
+	var est := minf(0.8, 0.13 * maxi(0, path.size() - 1))
+	if a.kind == "dismount" or a.sub in ["board", "struct", "repair", "repair_turret", "sabotage", "hack", "barricade", "train"]:
+		est += 0.4
+	for e in evs:
+		est += {"hit": 0.52, "kill": 0.42, "turret_fire": 0.52, "turret_hit": 0.52, "capture": 0.42, "card": 0.37}.get(e[0], 0.05)
+	var base_speed: float = board.speed
+	board.speed = base_speed * maxf(1.0, est / 2.6)          # margen para no pasar de 3 s
+	var at := {}                                          # dónde está cada unidad durante la animación
+	for id in pre:
+		var u: TWUnit = pre[id]
+		if u.pos != null:
+			at[id] = u.pos
+		elif u.carrier >= 0 and pre.has(u.carrier) and pre[u.carrier].pos != null:
+			at[id] = pre[u.carrier].pos
+	var mover: int = a.unit if path.size() > 1 else -1
+	var statics := {}
+	var ejected := []
+	for e in evs:
+		if e[0] == "kill" and e[1] != mover and pre.has(e[1]) and at.has(e[1]):
+			statics[e[1]] = {"u": pre[e[1]], "c": board.center(at[e[1]]), "k": 1.0}
+			board.ghosts.append(statics[e[1]])
+		elif e[0] == "eject":
+			board.hidden_units[e[1]] = true
+			ejected.append(e[1])
+	# 1. movimiento
+	if mover >= 0:
+		board.hidden_units[mover] = true
+		sfx.play("move")
+		await board.move_ghost(pre[mover], path)
+		board.hidden_units.erase(mover)
+		at[mover] = path[-1]
+		for e in evs:
+			if e[0] == "kill" and e[1] == mover:
+				statics[mover] = {"u": pre[mover], "c": board.center(path[-1]), "k": 1.0}
+				board.ghosts.append(statics[mover])
+	if a.kind == "dismount":
+		var v: TWUnit = pre[a.unit]
+		var rid: int = v.char_id if a.sub == "char" else v.crew
+		board.hidden_units[rid] = true
+		sfx.play("select")
+		await board.move_ghost(pre[rid], [v.pos, a.dest])
+		board.hidden_units.erase(rid)
+	elif a.kind == "activate" and a.sub == "board":
+		await board.move_ghost(pre[a.unit], [at[a.unit], game.units[a.target].pos])
+	elif a.kind == "produce":
+		sfx.play("select")
+		board.ring(board.center(a.dest), BoardView.SIDE_COLOR[game.current])
+	elif a.kind == "activate":
+		var tgt = a.target
+		var col := {"repair": Color("6cff8a"), "repair_turret": Color("6cff8a"), "sabotage": Color("ff5050"),
+			"hack": BoardView.SIDE_COLOR[game.current], "barricade": Color("b07a3c"), "train": Color("ffd84a")}
+		if col.has(a.sub):
+			var cell = tgt if tgt is Vector2i else (game.units[tgt].pos if tgt is int and game.units.has(tgt) else a.dest)
+			if cell != null:
+				sfx.play("card" if a.sub == "hack" else "select")
+				board.ring(board.center(cell), col[a.sub])
+				await board.wait(0.3)
+		elif a.sub == "struct":
+			sfx.play("boom")
+			await board.boom(board.center(tgt))
+	# 2. sucesos en orden
+	for e in evs:
+		match e[0]:
+			"hit":
+				if not at.has(e[2]):
+					continue
+				var to: Vector2 = board.center(at[e[2]])
+				if e[1] >= 0 and at.has(e[1]):
+					sfx.play("shot")
+					await board.shot(board.center(at[e[1]]), to)
+				else:
+					sfx.play("shot", -4.0)
+					await board.bomb(to)
+				board.number(to, "-%d" % e[3])
+				await board.wait(0.28)
+			"kill":
+				var pos: Vector2 = board.center(e[3]) if e[3] != null else (board.center(at[e[1]]) if at.has(e[1]) else Vector2.ZERO)
+				if statics.has(e[1]):
+					board.ghosts.erase(statics[e[1]])
+				sfx.play("boom")
+				await board.boom(pos, pre.get(e[1]))
+			"eject":
+				board.hidden_units.erase(e[1])
+				board.ring(board.center(e[2]), Color.WHITE, 0.6, 0.35)
+			"turret_fire", "turret_hit":
+				var q: Vector2i = e[1] if e[0] == "turret_fire" else e[2]
+				var shooter = q if e[0] == "turret_fire" else at.get(e[1])
+				var target = at.get(e[2]) if e[0] == "turret_fire" else q
+				if shooter == null or target == null:
+					continue
+				sfx.play("shot")
+				await board.shot(board.center(shooter), board.center(target), Color("9fe3ff") if e[0] == "turret_fire" else Color("fff2a8"))
+				board.number(board.center(target), "-%d" % e[3], Color("ff9a3c") if e[0] == "turret_hit" else Color("ff5050"))
+				await board.wait(0.28)
+			"capture":
+				sfx.play("capture")
+				board.ring(board.center(e[2]), BoardView.SIDE_COLOR[e[1]], 1.2, 0.6)
+				board.number(board.center(e[2]), "¡Capturado!", BoardView.SIDE_COLOR[e[1]].lightened(0.4))
+				await board.wait(0.4)
+			"card":
+				sfx.play("card")
+				var c: String = e[2]
+				var col: Color = Color("6fb7ff") if c in ["pem", "hackeo"] else (Color("ff9a3c") if c in ["aereo", "saturacion"] else BoardView.SIDE_COLOR[e[1]])
+				if e[3] != null:
+					board.ring(board.center(e[3]), col, 1.6 if c in ["pem", "saturacion", "aereo"] else 1.0, 0.5)
+				await board.wait(0.35)
+	for id in ejected:
+		board.hidden_units.erase(id)
+	for gh in statics.values():
+		board.ghosts.erase(gh)
+	board.speed = base_speed
+	anim_max = maxf(anim_max, (Time.get_ticks_msec() - t_start) / 1000.0 * base_speed)
+	anim_count += 1
+	busy = false
+	_refresh()
 
 
 func _report_events() -> void:
@@ -452,17 +630,24 @@ func _report_events() -> void:
 
 
 func _on_end_turn() -> void:
-	if game.winner != TWGame.NO_WINNER:
+	if game.winner != TWGame.NO_WINNER or busy or ending:
 		return
+	ending = true
 	_do(TWGame.act("end"))
+	await _idle()
 	if game.winner == TWGame.NO_WINNER:
 		game.start_turn()
+		sfx.play("turn", -6.0)
 		history.append("— Turno de la %s (ronda %d) —" % [SIDE_NAME[game.current], game.round])
 		_turn_started()
+		ending = false
 		_refresh()
 		if vs_ai and game.current == 1:
 			await get_tree().create_timer(0.3).timeout
 			_ai_turn()
+	else:
+		ending = false
+		_refresh()
 
 
 func _ai_turn() -> void:
@@ -478,7 +663,8 @@ func _ai_turn() -> void:
 			camera.center_on(where)
 			await get_tree().create_timer(0.35).timeout
 		_do(a)
-		await get_tree().create_timer(0.25).timeout
+		await _idle()
+		await get_tree().create_timer(0.2 / board.speed).timeout
 	_on_end_turn()
 
 
@@ -518,11 +704,16 @@ func _process(delta: float) -> void:
 	if not _is_human(s):
 		clock_label.text = ""
 		return
+	if busy or ending:                        # el reloj se para mientras se anima una acción
+		return
 	if turn_left > 0.0:
 		turn_left = maxf(0.0, turn_left - delta)
 	else:
 		reserve[s] = maxf(0.0, reserve[s] - delta)
 	var left: float = turn_left if turn_left > 0.0 else reserve[s]
+	if left <= 5.0 and ceili(left) != last_tick:
+		last_tick = ceili(left)
+		sfx.play("tick")
 	clock_label.text = ("%d s" if turn_left > 0.0 else "Reserva %d s") % ceili(left)
 	clock_label.add_theme_color_override("font_color",
 		Color("ff5a5a") if left <= 5.0 else (Color("ffb347") if left <= 10.0 or turn_left <= 0.0 else Color.WHITE))
@@ -540,7 +731,7 @@ func _autoplay() -> void:
 	var jade_turn := -1
 	while game.winner == TWGame.NO_WINNER and steps < 3000:
 		steps += 1
-		if game.current == 1:
+		if game.current == 1 or busy or ending:
 			await get_tree().process_frame
 			continue
 		if game.turn != jade_turn:
@@ -574,8 +765,9 @@ func _autoplay() -> void:
 			mismatches += 1
 			print("La interfaz no reprodujo: ", TWGame.action_key(a))
 			_do(a)
-	print("Autojuego terminado: %s, %s, %d acciones, %d discrepancias" % [
-		"empate" if game.winner < 0 else SIDE_NAME[game.winner], game.how, game.log.size(), mismatches])
+	await _idle()
+	print("Autojuego terminado: %s, %s, %d acciones, %d discrepancias, %d animaciones, la más larga %.2f s" % [
+		"empate" if game.winner < 0 else SIDE_NAME[game.winner], game.how, game.log.size(), mismatches, anim_count, anim_max])
 
 
 func _demo(n: int) -> void:
@@ -922,3 +1114,47 @@ func _clock_test() -> void:
 	await get_tree().create_timer(1.5).timeout
 	print("Reloj: activo %s, cuenta %s, muestra «%s», turno pasado %s, reserva %.1f, aviso %s" % [clock_on, ticking, shows,
 		game.turn > turn0, reserve[0], history.any(func(h): return h.contains("se agota el tiempo"))])
+
+
+## Captura a mitad de un ataque: juega sin animar hasta que Jade puede atacar y anima ese ataque.
+## --anim-at=S fija el momento de la captura (segundos desde el inicio de la acción).
+func _anim_shot(path: String, args: Array) -> void:
+	var at_s := 0.95
+	for a in args:
+		if a.begins_with("--anim-at="):
+			at_s = float(a.substr(10))
+	anim = false
+	var attack = null
+	for i in range(60):
+		if game.current == 0:
+			for a in game.legal_actions():
+				if a.kind == "activate" and a.sub == "attack" and a.dest != game.units[a.unit].pos:
+					attack = a
+					break
+		if attack != null:
+			break
+		bots[game.current].begin_turn()
+		var guard := 0
+		while guard < 60:
+			guard += 1
+			var a: Dictionary = bots[game.current].choose()
+			if a.kind == "end":
+				break
+			_do(a)
+		_do(TWGame.act("end"))
+		game.start_turn()
+	_reset_selection()
+	if attack == null:
+		print("No se encontró un ataque")
+		return
+	camera.center_on(attack.dest, false)
+	await get_tree().process_frame
+	anim = true
+	board.speed = 1.0
+	_do(attack)
+	await get_tree().create_timer(at_s).timeout
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(path)
+	await _idle()
+	print("Captura de animación: ", action_label_fallback(attack))
+	get_tree().quit()

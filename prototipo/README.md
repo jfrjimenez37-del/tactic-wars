@@ -17,11 +17,13 @@ hacker, evolución de la tripulación, economía, escalada de PM, límites, domi
 | `ui/main.tscn`, `ui/main.gd` | Despliegue y pantalla de partida: barra superior, panel de acciones, cartas, registro y fin de partida. |
 | `ui/board_view.gd` | Dibujo del tablero, las unidades, las torretas y los resaltados. |
 | `ui/board_camera.gd` | Cámara del tablero: arrastrar, ampliar con dos dedos o la rueda, centrar en una casilla. |
+| `ui/sfx.gd` | Efectos de sonido generados por código (sin archivos de audio). |
 | `tests/run_golden.gd` | Pruebas: vuelve a jugar partidas del simulador y compara el estado turno a turno. |
 | `tests/golden/` | 24 partidas de referencia exportadas con `tactic_wars_sim/export_golden.py`. |
 | `tests/run_bots.gd`, `tests/bot_golden/` | Pruebas de la IA: 24 partidas bot contra bot que deben salir idénticas a las de Python. |
 | `tests/bench_bot.gd` | Mide el tiempo que tarda la IA en decidir cada acción. |
 | `tests/run_camera.gd` | Prueba de la cámara con toques, arrastres y pellizcos simulados. |
+| `tests/run_sfx.gd` | Comprueba que cada sonido generado tiene volumen y no satura. |
 
 ## Cómo se juega en el prototipo
 
@@ -42,6 +44,11 @@ recomendados y 3 cartas, y despliega de forma automática.
 - El mapa no cabe entero a propósito: la cámara se centra en tu personaje al empezar tu turno y sigue
   a la IA durante el suyo. Arrastra con un dedo para mirar por el mapa y pellizca con dos para ampliar o
   reducir. Botones: −, +, «Mapa» (mapa entero / vista ampliada) y ★ (volver a tu personaje).
+- Cada acción se anima: la unidad recorre su camino, disparo, número de daño, explosión, capturas,
+  cartas y disparos de las torretas. Una acción dura como mucho 3 s (si tiene muchos sucesos, se
+  acelera). Mientras se anima no se aceptan toques y el reloj se para.
+- Sonido para mover, disparar, explotar, capturar, cartas, cambio de turno y los últimos 5 s del reloj;
+  se apaga con el botón «Sonido» de arriba.
 
 - Juegas con la Brigada Jade (verde) contra la Legión Ámbar (naranja), que mueve la IA (la misma que jugó las
   partidas del simulador).
@@ -73,6 +80,8 @@ godot --path . -- --setup-test=play                  # preparación y despliegue
 godot --path . -- --setup-test=hotseat               # lo mismo con dos jugadores en el mismo móvil
 godot --path . -- --setup-test=clock                 # reloj activado: comprueba que el turno pasa solo
 godot --headless --path . --script res://tests/run_camera.gd
+godot --headless --path . --script res://tests/run_sfx.gd
+godot --path . -- --demo=0 --anim-shot=a.png --anim-at=1.0   # captura a mitad de un ataque animado
 godot --path . -- --setup-test=setup --shot=p.png    # captura de la pantalla de preparación (o =deploy)
 ```
 
@@ -80,9 +89,8 @@ Las opciones `--demo`, `--autoplay` y `--select` empiezan una partida rápida co
 
 ## Pendiente
 
-1. Exportación a Android y prueba en el móvil.
-2. Animaciones de movimiento y combate (máximo 3 s), reloj de 25 s, sonido.
-3. Arte definitivo (ahora son formas y letras).
+1. Arte definitivo (ahora son formas y letras) y música.
+2. Ajustes tras probar en el móvil: tamaño de la vista, velocidad de las animaciones.
 
 ## Exportar a Android
 
