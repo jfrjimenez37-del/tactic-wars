@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.zip
+.godot/
+build/
+*.apk

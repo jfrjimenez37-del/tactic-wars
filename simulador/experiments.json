@@ -1,0 +1,5326 @@
+{
+  "cordura": {
+    "description": "Bot heuristico contra bot aleatorio: el heuristico debe ganar casi siempre",
+    "games": 80,
+    "seed": 100,
+    "bots": [
+      "heuristico",
+      "aleatorio"
+    ]
+  },
+  "base": {
+    "description": "Reglas actuales (C1-C13 con A1-A8), espejo con el ejercito equilibrado",
+    "games": 300,
+    "seed": 1000
+  },
+  "iniciativa": {
+    "description": "Prueba emparejada: misma semilla jugada dos veces cambiando solo quien empieza",
+    "games": 600,
+    "seed": 3000,
+    "paired": true
+  },
+  "ejercitos": {
+    "description": "Todos los ejercitos contra todos",
+    "games": 900,
+    "seed": 5000,
+    "matchups": [
+      [
+        "equilibrado",
+        "blindado"
+      ],
+      [
+        "equilibrado",
+        "artilleria"
+      ],
+      [
+        "equilibrado",
+        "rapido"
+      ],
+      [
+        "equilibrado",
+        "infanteria"
+      ],
+      [
+        "equilibrado",
+        "ingenieros"
+      ],
+      [
+        "blindado",
+        "artilleria"
+      ],
+      [
+        "blindado",
+        "rapido"
+      ],
+      [
+        "blindado",
+        "infanteria"
+      ],
+      [
+        "blindado",
+        "ingenieros"
+      ],
+      [
+        "artilleria",
+        "rapido"
+      ],
+      [
+        "artilleria",
+        "infanteria"
+      ],
+      [
+        "artilleria",
+        "ingenieros"
+      ],
+      [
+        "rapido",
+        "infanteria"
+      ],
+      [
+        "rapido",
+        "ingenieros"
+      ],
+      [
+        "infanteria",
+        "ingenieros"
+      ]
+    ]
+  },
+  "estilos": {
+    "description": "Estilo agresivo (bando 0) contra el normal",
+    "games": 300,
+    "seed": 7000,
+    "styles": [
+      "agresivo",
+      "normal"
+    ]
+  },
+  "estilos_prudente": {
+    "description": "Estilo prudente (bando 0) contra el normal",
+    "games": 300,
+    "seed": 7000,
+    "styles": [
+      "prudente",
+      "normal"
+    ]
+  },
+  "estilos_economico": {
+    "description": "Estilo economico (bando 0) contra el normal",
+    "games": 300,
+    "seed": 7000,
+    "styles": [
+      "economico",
+      "normal"
+    ]
+  },
+  "S1_reequilibrio": {
+    "description": "Variante S1: antitanque 4 contra blindado, tanque 2 contra a pie, artilleria 3 contra blindado",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    }
+  },
+  "S2_puntos": {
+    "description": "Variante S2: desempate por puntos acumulados por edificio",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "tiebreak": "puntos"
+    }
+  },
+  "S1S2S3": {
+    "description": "S1 + S2 + victoria anticipada con 12 puntos de ventaja",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "tiebreak": "puntos",
+      "lead": 12
+    }
+  },
+  "S1S2S3_iniciativa": {
+    "description": "Prueba emparejada de iniciativa con S1 + S2 + S3",
+    "games": 600,
+    "seed": 3000,
+    "paired": true,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "tiebreak": "puntos",
+      "lead": 12
+    }
+  },
+  "corta_12_rondas": {
+    "description": "Duracion: 12 rondas en lugar de 20 (con S1 y S2)",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "rounds": 12,
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "tiebreak": "puntos"
+    }
+  },
+  "corta_15_rondas": {
+    "description": "Duracion: 15 rondas en lugar de 20 (con S1 y S2)",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "rounds": 15,
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "tiebreak": "puntos"
+    }
+  },
+  "CG_sin_produccion_2pts": {
+    "description": "Variante S5: el cuartel general no produce y se captura con 2 puntos (con S1 y S2)",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "hq_produces": false,
+      "hq_points": 2,
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "tiebreak": "puntos"
+    }
+  },
+  "ingenieros_espejo": {
+    "description": "Espejo con ingenieros para medir barricadas y su efecto",
+    "games": 300,
+    "seed": 9000,
+    "matchups": [
+      [
+        "ingenieros",
+        "ingenieros"
+      ]
+    ]
+  },
+  "R_actual": {
+    "description": "Remontadas con las reglas actuales (5 vehiculos + 3 a pie)",
+    "games": 300,
+    "seed": 1000,
+    "config": {}
+  },
+  "R_S1": {
+    "description": "Solo S1, ejercito actual",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    }
+  },
+  "R_4+2": {
+    "description": "Propuesta: S1 + 4 vehiculos + 2 a pie + personaje en un tanque, fabricacion normal",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "R_4+2_fab+1": {
+    "description": "Propuesta con fabricacion +1 ronda (F/A/I/J 2, T/R 3)",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "R_4+2_fabx2": {
+    "description": "Propuesta con fabricacion x2 (F/A/I/J 2, T/R 4)",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_mult": 2
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "R_4+2_fab+1_tripF": {
+    "description": "Propuesta fab+1 con fusileros como tripulacion",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "crew": "F"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "R_4+2_fab+1_iniciativa": {
+    "description": "Propuesta fab+1, prueba emparejada de iniciativa",
+    "games": 600,
+    "seed": 3000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "paired": true
+  },
+  "R_pers_jeep": {
+    "description": "Propuesta fab+1 con el personaje en el jeep",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4_J",
+        "equilibrado4_J"
+      ]
+    ]
+  },
+  "R_pers_artilleria": {
+    "description": "Propuesta fab+1 con el personaje en la artilleria",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4_R",
+        "equilibrado4_R"
+      ]
+    ]
+  },
+  "R_ejercitos4": {
+    "description": "Propuesta fab+1: todos los ejercitos de 4+2 contra todos",
+    "games": 900,
+    "seed": 5000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ]
+    ]
+  },
+  "R_4+2_fab+1_S3": {
+    "description": "Propuesta fab+1 con S2 + S3 (victoria anticipada por 12 puntos)",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "tiebreak": "puntos",
+      "lead": 12
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "H_actual_igual": {
+    "description": "Habilidad: jugador fuerte (bando 0) contra flojo, reglas actuales",
+    "games": 300,
+    "seed": 1000,
+    "config": {},
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "H_actual_sin_tanque": {
+    "description": "Habilidad: el fuerte empieza sin un tanque, reglas actuales",
+    "games": 300,
+    "seed": 1000,
+    "config": {},
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "H_S1_sin_tanque": {
+    "description": "Habilidad: el fuerte empieza sin un tanque, solo S1",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    },
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "H_prop_igual": {
+    "description": "Habilidad: fuerte contra flojo, propuesta fab+1",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "H_prop_sin_tanque": {
+    "description": "Habilidad: el fuerte empieza sin un tanque, propuesta fab+1",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "H_prop_fabx2_sin_tanque": {
+    "description": "Habilidad: el fuerte empieza sin un tanque, propuesta fab x2",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_mult": 2
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "H_prop_S3_sin_tanque": {
+    "description": "Habilidad: el fuerte empieza sin un tanque, propuesta fab+1 con S2 + S3",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "tiebreak": "puntos",
+      "lead": 12
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "REC_iniciativa": {
+    "description": "Recomendacion aprobada (4+2+personaje, S1, fabricacion normal): iniciativa emparejada",
+    "games": 600,
+    "seed": 3000,
+    "paired": true,
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    }
+  },
+  "REC_igual": {
+    "description": "Recomendacion: fuerte contra flojo",
+    "games": 300,
+    "seed": 1000,
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    },
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "REC_sin_tanque": {
+    "description": "Recomendacion: el fuerte empieza sin un tanque",
+    "games": 300,
+    "seed": 1000,
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    },
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "REC_ejercitos": {
+    "description": "Recomendacion: ejercitos 4+2 contra todos",
+    "games": 900,
+    "seed": 5000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      }
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ]
+    ]
+  },
+  "V2_base": {
+    "description": "Reglas v2: 4+2+personaje, S1, fabricacion +1, evolucion de tripulacion pagando",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V2_evolucion_gratis": {
+    "description": "Reglas v2 con evolucion gratis",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "gratis"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V2_sin_evolucion": {
+    "description": "Reglas v2 sin evolucion de tripulacion",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V2_iniciativa": {
+    "description": "Reglas v2: iniciativa emparejada",
+    "games": 600,
+    "seed": 3000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "paired": true
+  },
+  "V2_fuerte_igual": {
+    "description": "Reglas v2: fuerte contra flojo",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "V2_fuerte_sin_tanque": {
+    "description": "Reglas v2: el fuerte empieza sin un tanque",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "V2_gratis_sin_tanque": {
+    "description": "Evolucion gratis: el fuerte empieza sin un tanque",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "gratis"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "V2_ejercitos": {
+    "description": "Reglas v2: ejercitos 4+2 contra todos",
+    "games": 900,
+    "seed": 5000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ]
+    ]
+  },
+  "V1_duracion": {
+    "description": "Reglas anteriores (5+3) para comparar la duracion",
+    "games": 300,
+    "seed": 1000
+  },
+  "V2_hacker_vs_equilibrado": {
+    "description": "Reglas v2 con hacker: ejercito con hacker contra equilibrado",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "hacker4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V2_hacker_espejo": {
+    "description": "Reglas v2: espejo con hacker en ambos bandos",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "hacker4",
+        "hacker4"
+      ]
+    ]
+  },
+  "V2_ejercitos_hacker": {
+    "description": "Reglas v2: los 7 ejercitos 4+2 (con hacker) contra todos",
+    "games": 1050,
+    "seed": 5000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ]
+  },
+  "V2_hacker_iniciativa": {
+    "description": "Reglas v2: iniciativa emparejada, espejo con hacker",
+    "games": 600,
+    "seed": 3000,
+    "paired": true,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "hacker4",
+        "hacker4"
+      ]
+    ]
+  },
+  "V2_hacker2_vs_equilibrado": {
+    "description": "Hacker con coste 2 contra equilibrado",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "costs": {
+        "K": 2
+      }
+    },
+    "matchups": [
+      [
+        "hacker4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V2_ejercitos_hacker2": {
+    "description": "Los 7 ejercitos con hacker de coste 2",
+    "games": 1050,
+    "seed": 5000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "costs": {
+        "K": 2
+      }
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ]
+  },
+  "V3_base": {
+    "description": "Reglas v3: economia nueva, escalada de PM, limites por tipo, dominio 7/10 y desempate por bajas",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V3_iniciativa": {
+    "description": "Reglas v3: iniciativa emparejada",
+    "games": 600,
+    "seed": 3000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "paired": true
+  },
+  "V3_fuerte_igual": {
+    "description": "Reglas v3: fuerte contra flojo",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "V3_fuerte_sin_tanque": {
+    "description": "Reglas v3: el fuerte empieza sin un tanque",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "V3_ejercitos": {
+    "description": "Reglas v3: los 7 ejercitos contra todos",
+    "games": 1050,
+    "seed": 5000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ]
+  },
+  "V3_encerrado": {
+    "description": "Reglas v3: bot encerrado en su base (bando 0) contra normal",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V2_encerrado": {
+    "description": "Reglas v2: bot encerrado en su base (bando 0) contra normal",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V3_hacker_espejo": {
+    "description": "Reglas v3: espejo con hacker",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "hacker4",
+        "hacker4"
+      ]
+    ]
+  },
+  "V3_dominio6": {
+    "description": "Variante de comparacion: dominio con 6 de 10",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 6,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  },
+  "V3_dominio6_fuerte_sin_tanque": {
+    "description": "Dominio 6: el fuerte empieza sin un tanque",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 6,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ],
+    "noises": [
+      0.3,
+      2.0
+    ]
+  },
+  "V3_dominio6_encerrado": {
+    "description": "Dominio 6: bot encerrado contra normal",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 6,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V3_dominio6_iniciativa": {
+    "description": "Dominio 6: iniciativa emparejada",
+    "games": 600,
+    "seed": 3000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 6,
+      "tiebreak": "edificios_bajas"
+    },
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "paired": true
+  },
+  "V4_actuales_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "actuales",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (mapas actuales): espejo"
+  },
+  "V4_actuales_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "actuales",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v4 (mapas actuales): iniciativa emparejada",
+    "paired": true
+  },
+  "V4_actuales_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "actuales",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (mapas actuales): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V4_actuales_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "actuales",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (mapas actuales): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V4_actuales_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "actuales",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v4 (mapas actuales): 7 ejercitos contra todos"
+  },
+  "V4_plaza_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "plaza",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Plaza central): espejo"
+  },
+  "V4_plaza_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "plaza",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v4 (Plaza central): iniciativa emparejada",
+    "paired": true
+  },
+  "V4_plaza_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "plaza",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Plaza central): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V4_plaza_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "plaza",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Plaza central): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V4_plaza_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "plaza",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v4 (Plaza central): 7 ejercitos contra todos"
+  },
+  "V4_isla_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "isla",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Isla central): espejo"
+  },
+  "V4_isla_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "isla",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v4 (Isla central): iniciativa emparejada",
+    "paired": true
+  },
+  "V4_isla_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "isla",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Isla central): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V4_isla_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "isla",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Isla central): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V4_isla_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "isla",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v4 (Isla central): 7 ejercitos contra todos"
+  },
+  "V4_cuatro_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Cuatro plazas): espejo"
+  },
+  "V4_cuatro_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v4 (Cuatro plazas): iniciativa emparejada",
+    "paired": true
+  },
+  "V4_cuatro_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Cuatro plazas): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V4_cuatro_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Cuatro plazas): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V4_cuatro_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v4 (Cuatro plazas): 7 ejercitos contra todos"
+  },
+  "V4_escalonada_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "escalonada",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Cuatro plazas escalonada): espejo"
+  },
+  "V4_escalonada_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "escalonada",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v4 (Cuatro plazas escalonada): iniciativa emparejada",
+    "paired": true
+  },
+  "V4_escalonada_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "escalonada",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Cuatro plazas escalonada): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V4_escalonada_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "escalonada",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v4 (Cuatro plazas escalonada): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V4_escalonada_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor"
+    },
+    "maps": "escalonada",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v4 (Cuatro plazas escalonada): 7 ejercitos contra todos"
+  },
+  "V5_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v5 (torretas, ingeniero y cartas) (Cuatro plazas): espejo"
+  },
+  "V5_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v5 (torretas, ingeniero y cartas) (Cuatro plazas): iniciativa emparejada",
+    "paired": true
+  },
+  "V5_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v5 (torretas, ingeniero y cartas) (Cuatro plazas): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V5_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v5 (torretas, ingeniero y cartas) (Cuatro plazas): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V5_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v5 (torretas, ingeniero y cartas) (Cuatro plazas): 7 ejercitos contra todos"
+  },
+  "V5_solo_torretas_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v5 solo con torretas e ingeniero (sin cartas): 7 ejercitos"
+  },
+  "V6a_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_hp": 10,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v6 (torretas de 10 PV, autorreparacion +1, cartas ajustadas) (Cuatro plazas): espejo"
+  },
+  "V6a_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_hp": 10,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v6 (torretas de 10 PV, autorreparacion +1, cartas ajustadas) (Cuatro plazas): iniciativa emparejada",
+    "paired": true
+  },
+  "V6a_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_hp": 10,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v6 (torretas de 10 PV, autorreparacion +1, cartas ajustadas) (Cuatro plazas): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V6a_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_hp": 10,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v6 (torretas de 10 PV, autorreparacion +1, cartas ajustadas) (Cuatro plazas): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V6a_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_hp": 10,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v6 (torretas de 10 PV, autorreparacion +1, cartas ajustadas) (Cuatro plazas): 7 ejercitos contra todos"
+  },
+  "V6b_base": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_armor": 1,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v6 (torretas con blindaje 1, autorreparacion +1, cartas ajustadas) (Cuatro plazas): espejo"
+  },
+  "V6b_iniciativa": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_armor": 1,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 600,
+    "seed": 3000,
+    "description": "Reglas v6 (torretas con blindaje 1, autorreparacion +1, cartas ajustadas) (Cuatro plazas): iniciativa emparejada",
+    "paired": true
+  },
+  "V6b_fuerte_sin_tanque": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_armor": 1,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v6 (torretas con blindaje 1, autorreparacion +1, cartas ajustadas) (Cuatro plazas): el fuerte empieza sin un tanque",
+    "noises": [
+      0.3,
+      2.0
+    ],
+    "handicap": [
+      [
+        "T"
+      ],
+      []
+    ]
+  },
+  "V6b_encerrado": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_armor": 1,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ],
+    "games": 300,
+    "seed": 1000,
+    "description": "Reglas v6 (torretas con blindaje 1, autorreparacion +1, cartas ajustadas) (Cuatro plazas): encerrado contra normal",
+    "styles": [
+      "encerrado",
+      "normal"
+    ]
+  },
+  "V6b_ejercitos": {
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_armor": 1,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ]
+      }
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "blindado4"
+      ],
+      [
+        "equilibrado4",
+        "artilleria4"
+      ],
+      [
+        "equilibrado4",
+        "rapido4"
+      ],
+      [
+        "equilibrado4",
+        "infanteria4"
+      ],
+      [
+        "equilibrado4",
+        "ingenieros4"
+      ],
+      [
+        "equilibrado4",
+        "hacker4"
+      ],
+      [
+        "blindado4",
+        "artilleria4"
+      ],
+      [
+        "blindado4",
+        "rapido4"
+      ],
+      [
+        "blindado4",
+        "infanteria4"
+      ],
+      [
+        "blindado4",
+        "ingenieros4"
+      ],
+      [
+        "blindado4",
+        "hacker4"
+      ],
+      [
+        "artilleria4",
+        "rapido4"
+      ],
+      [
+        "artilleria4",
+        "infanteria4"
+      ],
+      [
+        "artilleria4",
+        "ingenieros4"
+      ],
+      [
+        "artilleria4",
+        "hacker4"
+      ],
+      [
+        "rapido4",
+        "infanteria4"
+      ],
+      [
+        "rapido4",
+        "ingenieros4"
+      ],
+      [
+        "rapido4",
+        "hacker4"
+      ],
+      [
+        "infanteria4",
+        "ingenieros4"
+      ],
+      [
+        "infanteria4",
+        "hacker4"
+      ],
+      [
+        "ingenieros4",
+        "hacker4"
+      ]
+    ],
+    "games": 1050,
+    "seed": 5000,
+    "description": "Reglas v6 (torretas con blindaje 1, autorreparacion +1, cartas ajustadas) (Cuatro plazas): 7 ejercitos contra todos"
+  },
+  "REGLAS_ACTUALES": {
+    "description": "Reglas aprobadas el 22-10-2026 (v6b + PEM a todas las unidades + ataque aereo recarga 8), mapa Cuatro plazas. Sin simular todavia.",
+    "games": 300,
+    "seed": 1000,
+    "config": {
+      "damage": {
+        "A:bli": 4,
+        "T:pie": 2,
+        "R:bli": 3
+      },
+      "build_extra": 1,
+      "train": "pagando",
+      "supplies_start": 2,
+      "income_base": 1,
+      "income_hq": 0,
+      "income_city": 1,
+      "city_first": 5,
+      "city_retake": 2,
+      "supply_cap": 30,
+      "hq_heals": false,
+      "pm_schedule": [
+        [
+          1,
+          5,
+          1
+        ],
+        [
+          8,
+          6,
+          2
+        ],
+        [
+          14,
+          7,
+          3
+        ]
+      ],
+      "caps": {
+        "veh": 6,
+        "foot": 4,
+        "crew": 6
+      },
+      "domination": 7,
+      "tiebreak": "edificios_valor",
+      "plaza_turrets": true,
+      "cards": true,
+      "plaza_armor": 1,
+      "plaza_regen": 1,
+      "card_overrides": {
+        "torreta": [
+          2,
+          6,
+          3
+        ],
+        "misiles": [
+          3,
+          6,
+          5
+        ],
+        "pem": [
+          1,
+          6,
+          4
+        ],
+        "aereo": [
+          3,
+          8,
+          4
+        ]
+      },
+      "pem_all": true
+    },
+    "maps": "cuatro",
+    "matchups": [
+      [
+        "equilibrado4",
+        "equilibrado4"
+      ]
+    ]
+  }
+}

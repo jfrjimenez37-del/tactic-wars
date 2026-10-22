@@ -1,0 +1,150 @@
+
+=== CG_sin_produccion_2pts: 300 partidas
+  final: ronda_limite_puntos 90 %, empate 7 %, captura_CG 3 %
+  rondas: media 19.8, mediana 20
+  gana quien empieza: 46.4 % ±5.9
+  gana el bando 0: 46.4 % ±5.9
+  empates: 7.3 %
+  bajas causadas por: F 4 %, A 5 %, T 80 %, J 3 %, R 8 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.44, muros 0.50, desembarcos 4.78, eyecciones 4.62, subidas 3.81, reparaciones 0.14
+
+=== S1S2S3: 300 partidas
+  final: ronda_limite_puntos 52 %, ventaja_puntos 44 %, empate 4 %, captura_CG 0 %
+  rondas: media 16.8, mediana 20
+  gana quien empieza: 50.9 % ±5.8
+  gana el bando 0: 46.7 % ±5.8
+  empates: 3.7 %
+  bajas causadas por: F 4 %, A 10 %, T 73 %, J 3 %, R 9 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.43, muros 0.41, desembarcos 3.48, eyecciones 4.28, subidas 2.90, reparaciones 0.09
+
+=== S1S2S3_iniciativa: 600 partidas
+  final: ronda_limite_puntos 55 %, ventaja_puntos 41 %, empate 4 %
+  rondas: media 17.0, mediana 20
+  gana quien empieza: 53.0 % ±4.1
+  gana el bando 0: 49.7 % ±4.1
+  empates: 4.3 %
+  bajas causadas por: F 4 %, A 10 %, T 72 %, J 3 %, R 9 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.45, muros 0.46, desembarcos 3.83, eyecciones 4.31, subidas 3.13, reparaciones 0.08
+  emparejada: 300 semillas; el ganador no cambia al cambiar quien empieza en 56 %; gana quien empieza 50.7 % ±4.0
+  semillas donde gana siempre quien empieza: 63, siempre el segundo: 45
+
+=== S1_reequilibrio: 300 partidas
+  final: ronda_limite_inversion 54 %, ronda_limite_edificios 41 %, empate 4 %, captura_CG 0 %
+  rondas: media 20.0, mediana 20
+  gana quien empieza: 47.7 % ±5.8
+  gana el bando 0: 49.1 % ±5.8
+  empates: 4.3 %
+  bajas causadas por: F 5 %, A 12 %, T 69 %, J 2 %, R 10 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.44, muros 0.45, desembarcos 4.04, eyecciones 6.11, subidas 3.26, reparaciones 0.15
+  la ultima accion cambia el ganador del desempate: 7.0 %
+
+=== S2_puntos: 300 partidas
+  final: ronda_limite_puntos 95 %, empate 4 %, captura_CG 0 %
+  rondas: media 20.0, mediana 20
+  gana quien empieza: 54.4 % ±5.8
+  gana el bando 0: 46.3 % ±5.8
+  empates: 4.3 %
+  bajas causadas por: F 1 %, A 4 %, T 89 %, J 1 %, R 4 %, P 1 %
+  por partida: barricadas 0.00, puentes 0.41, muros 0.42, desembarcos 6.25, eyecciones 4.99, subidas 4.28, reparaciones 0.09
+
+=== base: 300 partidas
+  final: ronda_limite_inversion 53 %, ronda_limite_edificios 43 %, empate 3 %, captura_CG 1 %
+  rondas: media 19.9, mediana 20
+  gana quien empieza: 52.4 % ±5.7
+  gana el bando 0: 49.7 % ±5.7
+  empates: 2.7 %
+  bajas causadas por: F 1 %, A 4 %, T 89 %, J 1 %, R 4 %, P 1 %
+  por partida: barricadas 0.00, puentes 0.41, muros 0.43, desembarcos 6.52, eyecciones 5.65, subidas 4.47, reparaciones 0.12
+  la ultima accion cambia el ganador del desempate: 4.7 %
+
+=== cordura: 80 partidas
+  final: captura_CG 61 %, eliminacion 35 %, ronda_limite_edificios 4 %
+  rondas: media 12.6, mediana 12
+  gana quien empieza: 50.0 % ±11.0
+  gana el bando 0: 100.0 % ±0.0
+  bajas causadas por: F 2 %, A 0 %, T 78 %, J 19 %, R 1 %, P 0 %
+  por partida: barricadas 0.00, puentes 0.29, muros 0.80, desembarcos 12.78, eyecciones 1.48, subidas 7.41, reparaciones 0.12
+
+=== corta_12_rondas: 300 partidas
+  final: ronda_limite_puntos 93 %, empate 6 %, captura_CG 0 %
+  rondas: media 12.0, mediana 12
+  gana quien empieza: 55.5 % ±5.8
+  gana el bando 0: 44.1 % ±5.8
+  empates: 6.3 %
+  bajas causadas por: F 3 %, A 9 %, T 76 %, J 3 %, R 8 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.42, muros 0.38, desembarcos 3.02, eyecciones 3.31, subidas 2.57, reparaciones 0.05
+
+=== corta_15_rondas: 300 partidas
+  final: ronda_limite_puntos 95 %, empate 4 %, captura_CG 0 %
+  rondas: media 15.0, mediana 15
+  gana quien empieza: 55.1 % ±5.8
+  gana el bando 0: 43.9 % ±5.7
+  empates: 4.3 %
+  bajas causadas por: F 4 %, A 10 %, T 73 %, J 3 %, R 9 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.43, muros 0.40, desembarcos 3.43, eyecciones 4.12, subidas 2.86, reparaciones 0.07
+
+=== ejercitos: 900 partidas
+  final: ronda_limite_inversion 51 %, ronda_limite_edificios 45 %, empate 2 %, captura_CG 1 %
+  rondas: media 19.9, mediana 20
+  gana quien empieza: 49.1 % ±3.3
+  gana el bando 0: 47.0 % ±3.3
+  empates: 2.2 %
+  bajas causadas por: F 3 %, A 2 %, I 0 %, T 89 %, J 2 %, R 3 %, P 1 %
+  por partida: barricadas 0.14, puentes 0.33, muros 0.46, desembarcos 7.49, eyecciones 6.41, subidas 5.12, reparaciones 0.57
+  la ultima accion cambia el ganador del desempate: 6.4 %
+  victorias por ejercito: blindado 62.2 % ±5.5, ingenieros 54.1 % ±5.7, infanteria 54.0 % ±5.8, equilibrado 53.2 % ±5.7, rapido 46.8 % ±5.7, artilleria 29.8 % ±5.2
+
+=== estilos: 300 partidas
+  final: ronda_limite_edificios 49 %, ronda_limite_inversion 47 %, empate 2 %, captura_CG 1 %
+  rondas: media 20.0, mediana 20
+  gana quien empieza: 41.6 % ±5.6
+  gana el bando 0: 56.0 % ±5.7
+  empates: 2.3 %
+  bajas causadas por: F 3 %, A 5 %, T 85 %, J 2 %, R 5 %, P 2 %
+  por partida: barricadas 0.00, puentes 0.41, muros 0.48, desembarcos 7.53, eyecciones 8.72, subidas 5.20, reparaciones 0.14
+  la ultima accion cambia el ganador del desempate: 7.3 %
+  gana el estilo agresivo: 56.0 % ±5.7
+
+=== estilos_economico: 300 partidas
+  final: ronda_limite_inversion 50 %, ronda_limite_edificios 43 %, empate 5 %, captura_CG 2 %
+  rondas: media 19.9, mediana 20
+  gana quien empieza: 48.2 % ±5.8
+  gana el bando 0: 46.5 % ±5.8
+  empates: 5.3 %
+  bajas causadas por: F 1 %, A 3 %, T 89 %, J 1 %, R 4 %, P 1 %
+  por partida: barricadas 0.00, puentes 0.44, muros 0.47, desembarcos 6.83, eyecciones 5.06, subidas 4.75, reparaciones 0.13
+  la ultima accion cambia el ganador del desempate: 8.0 %
+  gana el estilo economico: 46.5 % ±5.8
+
+=== estilos_prudente: 300 partidas
+  final: ronda_limite_edificios 52 %, ronda_limite_inversion 44 %, empate 3 %, captura_CG 0 %
+  rondas: media 20.0, mediana 20
+  gana quien empieza: 51.4 % ±5.8
+  gana el bando 0: 39.7 % ±5.6
+  empates: 3.3 %
+  bajas causadas por: F 1 %, A 3 %, T 89 %, J 1 %, R 5 %, P 1 %
+  por partida: barricadas 0.00, puentes 0.43, muros 0.44, desembarcos 5.55, eyecciones 4.39, subidas 4.00, reparaciones 0.06
+  la ultima accion cambia el ganador del desempate: 3.0 %
+  gana el estilo prudente: 39.7 % ±5.6
+
+=== ingenieros_espejo: 300 partidas
+  final: ronda_limite_inversion 54 %, ronda_limite_edificios 42 %, captura_CG 2 %, empate 2 %
+  rondas: media 19.9, mediana 20
+  gana quien empieza: 44.1 % ±5.7
+  gana el bando 0: 44.7 % ±5.7
+  empates: 1.7 %
+  bajas causadas por: F 3 %, I 0 %, T 91 %, J 3 %, R 1 %, P 1 %
+  por partida: barricadas 0.59, puentes 0.26, muros 0.50, desembarcos 8.49, eyecciones 6.59, subidas 5.91, reparaciones 1.94
+  la ultima accion cambia el ganador del desempate: 6.3 %
+
+=== iniciativa: 600 partidas
+  final: ronda_limite_inversion 53 %, ronda_limite_edificios 44 %, empate 2 %, captura_CG 1 %
+  rondas: media 19.9, mediana 20
+  gana quien empieza: 50.3 % ±4.1
+  gana el bando 0: 48.0 % ±4.0
+  empates: 2.5 %
+  bajas causadas por: F 1 %, A 4 %, T 88 %, J 2 %, R 5 %, P 1 %
+  por partida: barricadas 0.00, puentes 0.43, muros 0.45, desembarcos 6.68, eyecciones 5.54, subidas 4.66, reparaciones 0.15
+  la ultima accion cambia el ganador del desempate: 5.8 %
+  emparejada: 300 semillas; el ganador no cambia al cambiar quien empieza en 49 %; gana quien empieza 49.0 % ±4.0
+  semillas donde gana siempre quien empieza: 69, siempre el segundo: 69
