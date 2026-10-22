@@ -5,17 +5,28 @@ extends Control
 const R = preload("res://core/tw_rules.gd")
 const BoardView = preload("res://ui/board_view.gd")
 const SetupScreen = preload("res://ui/setup_screen.gd")
+const BoardCamera = preload("res://ui/board_camera.gd")
+const FONT := 21              # tamaño de letra base (legible en el móvil)
+const PANEL_W := 420
+const TURN_TIME := 25.0       # C13: 25 s por turno y 60 s de reserva por partida
+const RESERVE_TIME := 60.0
 const SIDE_NAME := ["Brigada Jade", "Legión Ámbar"]
 
 var game: TWGame
-var board: Control
+var board: Control            # BoardView, dentro de la cámara
+var camera: Control           # BoardCamera
 var top_label: Label
+var clock_label: Label
+var clock_on := false
+var turn_left := TURN_TIME
+var reserve := [RESERVE_TIME, RESERVE_TIME]
 var info_label: Label
 var actions_box: VBoxContainer
 var cards_box: VBoxContainer
 var log_label: Label
 var end_button: Button
-var overlay: PanelContainer
+var overlay: Control
+var overlay_box: PanelContainer
 var vs_ai := true
 var phase := "play"           # setup | deploy | play
 var first := 0                # quién juega primero (sorteo)
@@ -26,6 +37,7 @@ var dep_cells := []
 var dep_sel := -1
 var dep_zone := []
 var dep_preview: TWGame
+var pass_button: Button      # «Estoy listo» de la pantalla de pasar el móvil
 var screen: Control           # pantalla que tapa el tablero (preparación o «pasa el móvil»)
 var bots := []                # TWBot de cada bando (Ámbar en partida; los dos en pruebas)
 
@@ -71,33 +83,58 @@ func _ready() -> void:
 
 
 func _build_ui() -> void:
+	theme = Theme.new()
+	theme.default_font_size = FONT
 	var bg := ColorRect.new()
 	bg.color = Color("1e2328")
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for k in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + k, 8)
+	add_child(margin)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 6)
+	margin.add_child(root)
+	var top := HBoxContainer.new()
+	root.add_child(top)
 	top_label = Label.new()
-	top_label.position = Vector2(16, 12)
-	top_label.add_theme_font_size_override("font_size", 20)
-	add_child(top_label)
-	board = BoardView.new()
-	board.position = Vector2(16, 64)
-	board.size = Vector2(R.W * BoardView.S, R.H * BoardView.S)
-	board.cell_clicked.connect(_on_cell)
-	add_child(board)
+	top_label.add_theme_font_size_override("font_size", FONT + 2)
+	top_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_label.clip_text = true
+	top.add_child(top_label)
+	clock_label = Label.new()
+	clock_label.add_theme_font_size_override("font_size", FONT + 4)
+	top.add_child(clock_label)
+	var body := HBoxContainer.new()
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 8)
+	root.add_child(body)
+	camera = BoardCamera.new()
+	camera.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	camera.cell_clicked.connect(_on_cell)
+	camera.on_focus = _focus_cell
+	body.add_child(camera)
+	board = camera.board
 	var panel := PanelContainer.new()
-	panel.position = Vector2(896, 56)
-	panel.size = Vector2(368, 650)
-	add_child(panel)
+	panel.custom_minimum_size = Vector2(PANEL_W + 24, 0)
+	body.add_child(panel)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(360, 640)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)
 	var vb := VBoxContainer.new()
-	vb.custom_minimum_size = Vector2(340, 0)
+	vb.custom_minimum_size = Vector2(PANEL_W, 0)
 	vb.add_theme_constant_override("separation", 6)
 	scroll.add_child(vb)
+	end_button = Button.new()
+	end_button.text = "Terminar turno"
+	end_button.custom_minimum_size = Vector2(PANEL_W, 56)
+	end_button.pressed.connect(_on_end_turn)
+	vb.add_child(end_button)
 	info_label = Label.new()
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info_label.custom_minimum_size = Vector2(340, 0)
+	info_label.custom_minimum_size = Vector2(PANEL_W, 0)
 	vb.add_child(info_label)
 	actions_box = VBoxContainer.new()
 	vb.add_child(actions_box)
@@ -108,21 +145,29 @@ func _build_ui() -> void:
 	cards_box = VBoxContainer.new()
 	vb.add_child(cards_box)
 	vb.add_child(HSeparator.new())
-	end_button = Button.new()
-	end_button.text = "Terminar turno"
-	end_button.custom_minimum_size = Vector2(340, 48)
-	end_button.pressed.connect(_on_end_turn)
-	vb.add_child(end_button)
 	log_label = Label.new()
 	log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	log_label.custom_minimum_size = Vector2(340, 0)
-	log_label.add_theme_font_size_override("font_size", 13)
+	log_label.custom_minimum_size = Vector2(PANEL_W, 0)
+	log_label.add_theme_font_size_override("font_size", FONT - 3)
 	vb.add_child(log_label)
-	overlay = PanelContainer.new()
-	overlay.position = Vector2(300, 260)
-	overlay.size = Vector2(560, 180)
+	overlay = Control.new()                  # fin de partida: fondo oscurecido y un panel centrado
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.visible = false
 	add_child(overlay)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.55)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	overlay_box = PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color("2a3036")
+	box.set_corner_radius_all(10)
+	box.set_content_margin_all(24)
+	overlay_box.add_theme_stylebox_override("panel", box)
+	center.add_child(overlay_box)
 
 
 ## Partida rápida con ejércitos fijos (para las pruebas automáticas).
@@ -134,6 +179,7 @@ func _new_game() -> void:
 	history = ["Empieza la partida. Juega la " + SIDE_NAME[game.current] + "."]
 	overlay.visible = false
 	_reset_selection()
+	camera.center_on(_focus_cell(), false)
 
 
 func _reset_selection() -> void:
@@ -204,9 +250,10 @@ func action_label_fallback(a: Dictionary) -> String:
 func _refresh() -> void:
 	var s := game.current
 	var pr := game.pm_rule()
-	top_label.text = "Ronda %d/%d · Turno: %s · PM %d (guardables %d) · Suministros Jade %d | Ámbar %d · Edificios %d-%d" % [
+	top_label.text = "Ronda %d/%d · %s · PM %d (guarda %d) · Sum. %d | %d · Edif. %d-%d" % [
 		mini(game.round, R.ROUNDS), R.ROUNDS, SIDE_NAME[s], game.pm, pr[1], game.supplies[0], game.supplies[1],
 		game.buildings_of(0), game.buildings_of(1)]
+	top_label.add_theme_color_override("font_color", BoardView.SIDE_COLOR[s].lightened(0.35))
 	board.selected = sel_unit
 	board.marks = {}
 	board.target_marks = {}
@@ -221,7 +268,7 @@ func _refresh() -> void:
 	_fill_info()
 	_fill_cards()
 	log_label.text = "\n".join(history.slice(maxi(0, history.size() - 8)))
-	end_button.disabled = game.winner != TWGame.NO_WINNER
+	end_button.disabled = game.winner != TWGame.NO_WINNER or not _is_human(game.current)
 	if game.winner != TWGame.NO_WINNER:
 		_show_winner()
 
@@ -260,7 +307,10 @@ func _fill_info() -> void:
 			if sel_cell != null:
 				_list_actions_at(sel_cell)
 		_:
-			info_label.text = "Turno de la %s. Toca una unidad propia, un cuartel propio o una carta." % SIDE_NAME[game.current]
+			if not _is_human(game.current):
+				info_label.text = "Juega la %s (IA)…" % SIDE_NAME[game.current]
+			else:
+				info_label.text = "Turno de la %s. Toca una unidad propia, un cuartel propio o una carta." % SIDE_NAME[game.current]
 	if mode != "idle":
 		_add_button("Cancelar selección", _reset_selection)
 
@@ -274,7 +324,8 @@ func _list_actions_at(p: Vector2i) -> void:
 func _add_button(text: String, cb: Callable) -> void:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(340, 40)
+	b.custom_minimum_size = Vector2(PANEL_W, 48)
+	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	b.pressed.connect(cb)
 	actions_box.add_child(b)
 
@@ -291,10 +342,11 @@ func _fill_cards() -> void:
 		if game.round < d[2]:
 			status = " · desde la ronda %d" % d[2]
 		elif ready_turn > game.turn:
-			status = " · lista en %d rondas" % int(ceil((ready_turn - game.turn) / 2.0))
-		b.text = "%s (%d PM)%s" % [R.CARD_NAMES[c], d[0], status]
-		b.custom_minimum_size = Vector2(340, 40)
-		b.disabled = not game.card_available(c) or game.winner != TWGame.NO_WINNER
+			var n := int(ceil((ready_turn - game.turn) / 2.0))
+			status = " · lista en %d ronda%s" % [n, "" if n == 1 else "s"]
+		b.text = "%s (%d PM)%s" % [R.CARD_NAMES[c], d[0], ("\n" + status.substr(3)) if status != "" else ""]
+		b.custom_minimum_size = Vector2(PANEL_W, 48)
+		b.disabled = not game.card_available(c) or game.winner != TWGame.NO_WINNER or not _is_human(game.current)
 		b.pressed.connect(_start_card.bind(c))
 		cards_box.add_child(b)
 
@@ -406,6 +458,7 @@ func _on_end_turn() -> void:
 	if game.winner == TWGame.NO_WINNER:
 		game.start_turn()
 		history.append("— Turno de la %s (ronda %d) —" % [SIDE_NAME[game.current], game.round])
+		_turn_started()
 		_refresh()
 		if vs_ai and game.current == 1:
 			await get_tree().create_timer(0.3).timeout
@@ -420,9 +473,63 @@ func _ai_turn() -> void:
 		var a: Dictionary = bots[1].choose()
 		if a.kind == "end":
 			break
+		var where = a.dest if a.dest != null else (game.units[a.unit].pos if a.unit >= 0 else null)
+		if where != null and not camera.is_cell_visible(where):      # la cámara sigue a la IA
+			camera.center_on(where)
+			await get_tree().create_timer(0.35).timeout
 		_do(a)
-		await get_tree().create_timer(0.15).timeout
+		await get_tree().create_timer(0.25).timeout
 	_on_end_turn()
+
+
+func _is_human(side: int) -> bool:
+	return not vs_ai or side == 0
+
+
+## Casilla del personaje del bando que juega (o que despliega); si no está, su cuartel general.
+func _focus_cell():
+	var g: TWGame = dep_preview if phase == "deploy" else game
+	if g == null:
+		return null
+	var s: int = dep_side if phase == "deploy" else (game.current if _is_human(game.current) else 0)
+	for u in g.units.values():
+		if u.side == s and u.t == "C":
+			var p = u.pos if u.pos != null else g.units[u.carrier].pos
+			if p != null:
+				return p
+	return g.hq[s]
+
+
+## Al empezar el turno de una persona: reloj a 25 s y cámara sobre su personaje.
+func _turn_started() -> void:
+	turn_left = TURN_TIME
+	if _is_human(game.current):
+		camera.center_on(_focus_cell())
+
+
+## C13: 25 s por turno y después la reserva de la partida; con los dos agotados, el turno termina.
+func _process(delta: float) -> void:
+	if clock_label == null:
+		return
+	if phase != "play" or game == null or not clock_on or game.winner != TWGame.NO_WINNER or screen != null:
+		clock_label.text = ""
+		return
+	var s := game.current
+	if not _is_human(s):
+		clock_label.text = ""
+		return
+	if turn_left > 0.0:
+		turn_left = maxf(0.0, turn_left - delta)
+	else:
+		reserve[s] = maxf(0.0, reserve[s] - delta)
+	var left: float = turn_left if turn_left > 0.0 else reserve[s]
+	clock_label.text = ("%d s" if turn_left > 0.0 else "Reserva %d s") % ceili(left)
+	clock_label.add_theme_color_override("font_color",
+		Color("ff5a5a") if left <= 5.0 else (Color("ffb347") if left <= 10.0 or turn_left <= 0.0 else Color.WHITE))
+	if turn_left <= 0.0 and reserve[s] <= 0.0:
+		history.append("%s: se agota el tiempo." % SIDE_NAME[s].split(" ")[1])
+		_reset_selection()
+		_on_end_turn()
 
 
 ## Prueba de la interfaz: el bando Jade juega tocando la pantalla (clics simulados) con la IA
@@ -491,11 +598,11 @@ func _demo(n: int) -> void:
 
 
 func _show_winner() -> void:
-	for c in overlay.get_children():
+	for c in overlay_box.get_children():
 		c.queue_free()
 	var vb := VBoxContainer.new()
 	var l := Label.new()
-	l.add_theme_font_size_override("font_size", 26)
+	l.add_theme_font_size_override("font_size", FONT + 9)
 	var how := {"dominio": "por dominio", "captura_CG": "capturando el cuartel general", "eliminacion": "por eliminación",
 		"ronda_limite_edificios": "por edificios en la ronda 20", "ronda_limite_valor_destruido": "por valor destruido",
 		"ronda_limite_valor_vivo": "por valor de las unidades vivas"}
@@ -504,13 +611,16 @@ func _show_winner() -> void:
 	else:
 		l.text = "Gana la %s %s" % [SIDE_NAME[game.winner], how.get(game.how, "")]
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(540, 0)
+	l.custom_minimum_size = Vector2(560, 0)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vb.add_child(l)
+	vb.add_theme_constant_override("separation", 18)
 	var b := Button.new()
 	b.text = "Nueva partida"
+	b.custom_minimum_size = Vector2(0, 56)
 	b.pressed.connect(_start_setup)
 	vb.add_child(b)
-	overlay.add_child(vb)
+	overlay_box.add_child(vb)
 	overlay.visible = true
 
 
@@ -548,18 +658,21 @@ func _pass_screen(text: String, next: Callable) -> void:
 	bg.color = Color("1e2328")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	sc.add_child(bg)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	sc.add_child(center)
 	var vb := VBoxContainer.new()
-	vb.position = Vector2(340, 260)
 	vb.custom_minimum_size = Vector2(600, 0)
 	vb.add_theme_constant_override("separation", 20)
-	sc.add_child(vb)
+	center.add_child(vb)
 	var l := Label.new()
 	l.text = text
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_font_size_override("font_size", 24)
+	l.add_theme_font_size_override("font_size", FONT + 6)
 	vb.add_child(l)
 	var b := Button.new()
+	pass_button = b
 	b.text = "Estoy listo"
 	b.custom_minimum_size = Vector2(600, 56)
 	b.pressed.connect(func():
@@ -571,11 +684,12 @@ func _pass_screen(text: String, next: Callable) -> void:
 
 
 ## Orden: Jade elige; con dos jugadores, Ámbar elige y despliega, y después despliega Jade.
-func _on_setup_done(army: Array, deck: Array, ai: bool, side: int) -> void:
+func _on_setup_done(army: Array, deck: Array, ai: bool, clock: bool, side: int) -> void:
 	choices[side] = {"army": army, "deck": deck}
 	_clear_screen()
 	if side == 0:
 		vs_ai = ai
+		clock_on = clock
 		if vs_ai:
 			choices[1] = {"army": TWSetup.random_army(), "deck": TWSetup.random_deck()}
 			cells[1] = _auto_all(1)
@@ -617,6 +731,7 @@ func _start_deploy(side: int) -> void:
 	dep_cells.resize(choices[side].army.size())
 	dep_sel = 0
 	_refresh_deploy()
+	camera.center_on(dep_preview.hq[side], false)
 
 
 func _unit_label(item: String) -> String:
@@ -651,7 +766,7 @@ func _refresh_deploy() -> void:
 		b.toggle_mode = true
 		SetupScreen.style_toggle(b, BoardView.SIDE_COLOR[dep_side])
 		b.button_pressed = i == dep_sel
-		b.custom_minimum_size = Vector2(340, 36)
+		b.custom_minimum_size = Vector2(PANEL_W, 48)
 		b.pressed.connect(func():
 			dep_sel = i
 			_refresh_deploy())
@@ -660,7 +775,7 @@ func _refresh_deploy() -> void:
 	_add_button("Quitar todas", _deploy_clear)
 	var ready := Button.new()
 	ready.text = "Listo"
-	ready.custom_minimum_size = Vector2(340, 48)
+	ready.custom_minimum_size = Vector2(PANEL_W, 48)
 	ready.disabled = left > 0
 	ready.pressed.connect(_deploy_done)
 	actions_box.add_child(ready)
@@ -731,6 +846,10 @@ func _begin_play() -> void:
 	end_button.visible = true
 	overlay.visible = false
 	history = [_army_text(0), _army_text(1), "Sorteo: empieza la %s." % SIDE_NAME[first]]
+	reserve = [RESERVE_TIME, RESERVE_TIME]
+	_turn_started()
+	if not _is_human(game.current):
+		camera.center_on(_focus_cell(), false)
 	_reset_selection()
 	if vs_ai and game.current == 1:
 		await get_tree().create_timer(0.3).timeout
@@ -751,24 +870,29 @@ func _setup_test(stage: String) -> void:
 		sc.card_buttons[c].pressed.emit()
 	if stage == "hotseat":
 		sc.rival_buttons[1].pressed.emit()
+	if stage == "clock":
+		sc.clock_button.pressed.emit()
 	if stage == "setup":
 		return
 	sc.continue_button.pressed.emit()
 	if stage == "hotseat":
-		screen.get_child(1).get_child(1).pressed.emit()        # «Estoy listo»
+		pass_button.pressed.emit()                             # «Estoy listo»
 		await get_tree().process_frame
 		screen._on_preset("rapido4")
 		screen._random_cards()
 		screen.continue_button.pressed.emit()
 		_deploy_auto()
 		_deploy_done()
-		screen.get_child(1).get_child(1).pressed.emit()
+		pass_button.pressed.emit()
 	_on_cell(board.marks.keys()[0])                          # coloca la primera unidad a mano
 	_on_cell(board.marks.keys()[3])
 	if stage == "deploy":
 		return
 	_deploy_auto()
 	_deploy_done()
+	if stage == "clock":
+		await _clock_test()
+		return
 	var types := []
 	for u in game.on_board(0):
 		types.append(u.t + ("*" if u.char_id > 0 else ""))
@@ -781,3 +905,20 @@ func _setup_test(stage: String) -> void:
 			frames += 1
 			await get_tree().process_frame
 		print("La IA abrió la partida: %d acciones, ahora juega la %s" % [game.log.size(), SIDE_NAME[game.current]])
+
+
+## Con el reloj activado: agota los 25 s y casi toda la reserva, y comprueba que el turno pasa solo.
+func _clock_test() -> void:
+	while game.current != 0:
+		await get_tree().process_frame
+	var turn0 := game.turn
+	await get_tree().create_timer(1.2).timeout
+	var ticking: bool = turn_left < TURN_TIME and reserve[0] == RESERVE_TIME
+	turn_left = 0.0
+	reserve[0] = 0.8
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var shows: String = clock_label.text
+	await get_tree().create_timer(1.5).timeout
+	print("Reloj: activo %s, cuenta %s, muestra «%s», turno pasado %s, reserva %.1f, aviso %s" % [clock_on, ticking, shows,
+		game.turn > turn0, reserve[0], history.any(func(h): return h.contains("se agota el tiempo"))])

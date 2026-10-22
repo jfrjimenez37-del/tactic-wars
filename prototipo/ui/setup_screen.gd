@@ -2,7 +2,7 @@ extends Control
 ## Pantalla de preparación (sec. 3 del reglamento): cada jugador elige en secreto 4 equipos, 2 tropas a pie,
 ## el equipo en el que empieza su personaje y sus 3 cartas. Emite done al pulsar Continuar.
 
-signal done(army: Array, deck: Array, vs_ai: bool)
+signal done(army: Array, deck: Array, vs_ai: bool, clock: bool)
 
 const R = preload("res://core/tw_rules.gd")
 const SIDE_NAME := ["Brigada Jade", "Legión Ámbar"]
@@ -31,6 +31,7 @@ const CARD_TEXT := {
 var side := 0
 var ask_rival := true
 var vs_ai := true
+var clock := false
 var counts := {}
 var hero := "T"
 var deck := []
@@ -41,6 +42,8 @@ var plus_buttons := {}
 var hero_box: HBoxContainer
 var card_buttons := {}
 var rival_buttons := []
+var clock_button: Button
+var tabs: TabContainer
 var status_label: Label
 var continue_button: Button
 
@@ -147,131 +150,147 @@ func _build(first: int) -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = Color("1e2328")
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for k in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + k, 16)
+		margin.add_theme_constant_override("margin_" + k, 12)
 	add_child(margin)
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 10)
+	root.add_theme_constant_override("separation", 8)
 	margin.add_child(root)
 
-	# cabecera: bando, sorteo y rival
+	# cabecera: bando, sorteo, rival y reloj
 	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 16)
+	head.add_theme_constant_override("separation", 12)
 	root.add_child(head)
-	var title := _label("Preparación · " + SIDE_NAME[side], 24, SIDE_COLOR[side])
+	var title := _label("Preparación · " + SIDE_NAME[side], 28, SIDE_COLOR[side])
 	head.add_child(title)
-	var draw := _label("Sorteo: juega primero la " + SIDE_NAME[first], 16, Color("c8c8c8"))
+	var draw := _label("Empieza: " + SIDE_NAME[first].split(" ")[1] + " (sorteo)", 19, Color("c8c8c8"))
 	draw.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	draw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(draw)
 	if ask_rival:
-		for opt in [[true, "Contra la IA"], [false, "2 jugadores (este móvil)"]]:
-			var b := _toggle(_button(opt[1], _set_rival.bind(opt[0]), Vector2(200, 40)))
+		for opt in [[true, "Contra la IA"], [false, "2 jugadores"]]:
+			var b := _toggle(_button(opt[1], _set_rival.bind(opt[0]), Vector2(170, 52)))
 			head.add_child(b)
 			rival_buttons.append(b)
+		clock_button = _toggle(_button("Reloj 25 s", _toggle_clock, Vector2(160, 52)))
+		head.add_child(clock_button)
 
-	var cols := HBoxContainer.new()
-	cols.add_theme_constant_override("separation", 20)
-	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(cols)
+	tabs = TabContainer.new()
+	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tabs.add_theme_font_size_override("font_size", 21)
+	root.add_child(tabs)
 
-	# columna 1: ejércitos recomendados
+	# pestaña 1: ejército (recomendados a la izquierda, composición y personaje a la derecha)
+	var army_tab := HBoxContainer.new()
+	army_tab.name = "Ejército"
+	army_tab.add_theme_constant_override("separation", 16)
+	tabs.add_child(army_tab)
 	var c1 := VBoxContainer.new()
-	c1.custom_minimum_size = Vector2(290, 0)
 	c1.add_theme_constant_override("separation", 6)
-	cols.add_child(c1)
-	c1.add_child(_label("Ejércitos recomendados", 18))
+	army_tab.add_child(_scroll(c1, 360))
+	c1.add_child(_label("Ejércitos recomendados", 21))
 	for key in PRESET_NAMES:
 		var parts := []
 		for item in R.ARMIES[key]:
 			parts.append(SHORT[item[0]] + ("★" if item.ends_with("*") else ""))
-		var b := _button("%s\n%s" % [PRESET_NAMES[key], _wrap(", ".join(parts), 40)], _on_preset.bind(key), Vector2(290, 0))
-		b.add_theme_font_size_override("font_size", 13)
+		var b := _button("%s\n%s" % [PRESET_NAMES[key], _wrap(", ".join(parts), 36)], _on_preset.bind(key), Vector2(340, 0))
+		b.add_theme_font_size_override("font_size", 17)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		c1.add_child(b)
-
-	# columna 2: composición y personaje
 	var c2 := VBoxContainer.new()
-	c2.custom_minimum_size = Vector2(400, 0)
 	c2.add_theme_constant_override("separation", 4)
-	cols.add_child(c2)
-	c2.add_child(_label("Equipos (%d)" % N_VEHICLES, 18))
+	var s2 := _scroll(c2, 0)
+	s2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	army_tab.add_child(s2)
+	c2.add_child(_label("Equipos (%d)" % N_VEHICLES, 21))
 	for t in VEHICLE_TYPES:
 		c2.add_child(_count_row(t))
-	c2.add_child(_label("Tropas a pie (%d)" % N_FOOT, 18))
+	c2.add_child(_label("Tropas a pie (%d)" % N_FOOT, 21))
 	for t in FOOT_TYPES:
 		c2.add_child(_count_row(t))
-	c2.add_child(_label("El fusilero y el personaje capturan 2 puntos por turno; las demás tropas, 1.", 13, Color("b0b0b0"), 400))
-	c2.add_child(_label("Personaje (4 PV, mov 3). Empieza dentro de:", 18))
+	c2.add_child(_label("El fusilero y el personaje capturan 2 puntos por turno; las demás tropas, 1.", 17, Color("b0b0b0"), 520))
+	c2.add_child(_label("Personaje (4 PV, mov 3). Empieza dentro de:", 21))
 	hero_box = HBoxContainer.new()
 	hero_box.add_theme_constant_override("separation", 8)
 	c2.add_child(hero_box)
-	c2.add_child(_label("Si lo destruyen, el rival gana %d suministros." % R.CHAR_BOUNTY, 13, Color("b0b0b0")))
+	c2.add_child(_label("Si lo destruyen, el rival gana %d suministros." % R.CHAR_BOUNTY, 17, Color("b0b0b0")))
 
-	# columna 3: cartas
-	var c3 := VBoxContainer.new()
-	c3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	c3.add_theme_constant_override("separation", 6)
-	cols.add_child(c3)
+	# pestaña 2: cartas, en dos columnas
+	var card_tab := VBoxContainer.new()
+	card_tab.name = "Cartas"
+	card_tab.add_theme_constant_override("separation", 6)
+	tabs.add_child(card_tab)
 	var ch := HBoxContainer.new()
-	c3.add_child(ch)
-	var cl := _label("Cartas (elige 3)", 18)
+	card_tab.add_child(ch)
+	var cl := _label("Elige 3 cartas", 21)
 	cl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ch.add_child(cl)
-	ch.add_child(_button("Al azar", _random_cards, Vector2(110, 34)))
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	c3.add_child(scroll)
-	var cards := VBoxContainer.new()
-	cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cards.add_theme_constant_override("separation", 4)
-	scroll.add_child(cards)
+	ch.add_child(_button("Al azar", _random_cards, Vector2(140, 48)))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 6)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sg := _scroll(grid, 0)
+	sg.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	card_tab.add_child(sg)
 	for c in R.CARDS:
 		var d: Array = R.CARDS[c]
-		var b := _button("%s · %d PM · desde la ronda %d · recarga %d\n%s" % [R.CARD_NAMES[c], d[0], d[2], d[1],
-			_wrap(CARD_TEXT[c], 66)], _on_card.bind(c), Vector2(0, 0))
+		var b := _button("%s · %d PM · ronda %d+ · recarga %d\n%s" % [R.CARD_NAMES[c], d[0], d[2], d[1],
+			_wrap(CARD_TEXT[c], 58)], _on_card.bind(c), Vector2(0, 0))
 		_toggle(b)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.add_theme_font_size_override("font_size", 13)
-		cards.add_child(b)
+		b.add_theme_font_size_override("font_size", 17)
+		grid.add_child(b)
 		card_buttons[c] = b
 
 	# pie: estado y continuar
 	var foot := HBoxContainer.new()
 	root.add_child(foot)
-	status_label = _label("", 16)
+	status_label = _label("", 19)
 	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	status_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	foot.add_child(status_label)
-	continue_button = _button("Continuar al despliegue", _on_continue, Vector2(280, 48))
+	continue_button = _button("Continuar", _on_continue, Vector2(260, 56))
 	foot.add_child(continue_button)
+
+
+## Contenedor con desplazamiento vertical (ancho fijo si width > 0).
+func _scroll(content: Control, width: int) -> ScrollContainer:
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	if width > 0:
+		sc.custom_minimum_size = Vector2(width, 0)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(content)
+	return sc
 
 
 func _count_row(t: String) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	var u: Array = R.UNIT[t]
-	var name := _label(R.NAMES[t], 16)
-	name.custom_minimum_size = Vector2(130, 0)
+	var name := _label(R.NAMES[t], 21)
+	name.custom_minimum_size = Vector2(160, 0)
 	name.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(name)
-	var stats := _label("%d PV · mov %d · %d sum." % [u[2], u[3], u[7]], 12, Color("b0b0b0"))
-	stats.custom_minimum_size = Vector2(140, 0)
+	var stats := _label("%d PV · mov %d · %d sum." % [u[2], u[3], u[7]], 16, Color("b0b0b0"))
+	stats.custom_minimum_size = Vector2(180, 0)
 	stats.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(stats)
-	var minus := _button("−", _change.bind(t, -1), Vector2(44, 36))
+	var minus := _button("−", _change.bind(t, -1), Vector2(60, 48))
 	row.add_child(minus)
-	var n := _label("0", 18)
-	n.custom_minimum_size = Vector2(28, 0)
+	var n := _label("0", 24)
+	n.custom_minimum_size = Vector2(40, 0)
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	n.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(n)
-	var plus := _button("+", _change.bind(t, 1), Vector2(44, 36))
+	var plus := _button("+", _change.bind(t, 1), Vector2(60, 48))
 	row.add_child(plus)
 	count_labels[t] = n
 	minus_buttons[t] = minus
@@ -280,6 +299,11 @@ func _count_row(t: String) -> HBoxContainer:
 
 
 # ------------------------------------------------------------------ interacción
+func _toggle_clock() -> void:
+	clock = not clock
+	_update()
+
+
 func _set_rival(ai: bool) -> void:
 	vs_ai = ai
 	_update()
@@ -326,12 +350,16 @@ func _on_continue() -> void:
 	if is_valid():
 		var d := deck.duplicate()
 		d.sort()
-		done.emit(army(), d, vs_ai)
+		done.emit(army(), d, vs_ai, clock)
 
 
 func _update() -> void:
 	for i in range(rival_buttons.size()):
 		rival_buttons[i].button_pressed = (i == 0) == vs_ai
+	if clock_button != null:
+		clock_button.button_pressed = clock
+	tabs.set_tab_title(0, "1. Ejército")
+	tabs.set_tab_title(1, "2. Cartas (%d/3)" % deck.size())
 	for t in counts:
 		count_labels[t].text = str(counts[t])
 		var group: Array = VEHICLE_TYPES if VEHICLE_TYPES.has(t) else FOOT_TYPES
@@ -342,7 +370,7 @@ func _update() -> void:
 		c.queue_free()
 	for t in VEHICLE_TYPES:
 		if counts[t] > 0:
-			var b := _toggle(_button(R.NAMES[t], _set_hero.bind(t), Vector2(128, 40)))
+			var b := _toggle(_button(R.NAMES[t], _set_hero.bind(t), Vector2(160, 52)))
 			b.button_pressed = t == hero
 			hero_box.add_child(b)
 	for c in card_buttons:

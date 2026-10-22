@@ -16,16 +16,20 @@ hacker, evolución de la tripulación, economía, escalada de PM, límites, domi
 | `ui/setup_screen.gd` | Pantalla de preparación: ejército, equipo del personaje, 3 cartas y rival. |
 | `ui/main.tscn`, `ui/main.gd` | Despliegue y pantalla de partida: barra superior, panel de acciones, cartas, registro y fin de partida. |
 | `ui/board_view.gd` | Dibujo del tablero, las unidades, las torretas y los resaltados. |
+| `ui/board_camera.gd` | Cámara del tablero: arrastrar, ampliar con dos dedos o la rueda, centrar en una casilla. |
 | `tests/run_golden.gd` | Pruebas: vuelve a jugar partidas del simulador y compara el estado turno a turno. |
 | `tests/golden/` | 24 partidas de referencia exportadas con `tactic_wars_sim/export_golden.py`. |
 | `tests/run_bots.gd`, `tests/bot_golden/` | Pruebas de la IA: 24 partidas bot contra bot que deben salir idénticas a las de Python. |
 | `tests/bench_bot.gd` | Mide el tiempo que tarda la IA en decidir cada acción. |
+| `tests/run_camera.gd` | Prueba de la cámara con toques, arrastres y pellizcos simulados. |
 
 ## Cómo se juega en el prototipo
 
 **Preparación (sec. 3 del reglamento).** Se sortea quién juega primero. Cada jugador elige 4 equipos y
 2 tropas a pie (con los botones − y +, o partiendo de un ejército recomendado), el equipo en el que empieza
-su personaje y 3 cartas. Jade elige también el rival: la IA o un segundo jugador en el mismo móvil.
+su personaje y 3 cartas. Jade elige también el rival (la IA o un segundo jugador en el mismo móvil) y
+si se juega con reloj (C13: 25 s por turno y 60 s de reserva por partida; con los dos agotados, el turno
+termina solo).
 
 **Despliegue.** Cada jugador coloca sus unidades a 3 casillas o menos de su CG o de su cuartel: elige una
 unidad en el panel y toca una casilla resaltada. Puede moverlas tocándolas otra vez, colocar el resto de
@@ -34,6 +38,10 @@ intermedia para que ninguno vea lo que eligió el otro. La IA elige al azar uno 
 recomendados y 3 cartas, y despliega de forma automática.
 
 **Partida.**
+
+- El mapa no cabe entero a propósito: la cámara se centra en tu personaje al empezar tu turno y sigue
+  a la IA durante el suyo. Arrastra con un dedo para mirar por el mapa y pellizca con dos para ampliar o
+  reducir. Botones: −, +, «Mapa» (mapa entero / vista ampliada) y ★ (volver a tu personaje).
 
 - Juegas con la Brigada Jade (verde) contra la Legión Ámbar (naranja), que mueve la IA (la misma que jugó las
   partidas del simulador).
@@ -63,6 +71,8 @@ godot --path . -- --autoplay --shot=final.png      # partida completa con toques
 godot --path . -- --demo=4 --select=E5 --shot=a.png  # captura con una unidad seleccionada
 godot --path . -- --setup-test=play                  # preparación y despliegue pulsando botones, contra la IA
 godot --path . -- --setup-test=hotseat               # lo mismo con dos jugadores en el mismo móvil
+godot --path . -- --setup-test=clock                 # reloj activado: comprueba que el turno pasa solo
+godot --headless --path . --script res://tests/run_camera.gd
 godot --path . -- --setup-test=setup --shot=p.png    # captura de la pantalla de preparación (o =deploy)
 ```
 
@@ -89,3 +99,7 @@ Desde la línea de comandos: `godot --headless --path . --export-debug "Android"
 `tools/android/MiniApkSigner.java` es un sustituto mínimo de `apksigner` (basado en la librería apksig de
 Maven Central) que se usó para firmar la APK en un entorno sin acceso al Android SDK. Firma solo con el
 esquema v2, que vale para Android 7.0 o superior. Con el SDK normal no hace falta.
+
+`tools/android/debug.keystore` es la llave de depuración (alias `androiddebugkey`, contraseña `android`)
+con la que se firman las APK de prueba. Usar siempre la misma permite instalar cada versión nueva encima
+de la anterior; con otra llave, Android obliga a desinstalar primero.

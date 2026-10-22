@@ -1,7 +1,5 @@
 extends Control
-## Dibuja el tablero, las unidades, las torretas y los resaltados. Emite cell_clicked al tocar una casilla.
-
-signal cell_clicked(cell: Vector2i)
+## Dibuja el tablero, las unidades, las torretas y los resaltados. Los toques los recibe BoardCamera.
 
 const R = preload("res://core/tw_rules.gd")
 const S := 72                                   # tamaño de casilla en píxeles
@@ -23,19 +21,10 @@ var target_marks := {}             # casilla -> Color (objetivos)
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(R.W * S, R.H * S)
-	mouse_filter = Control.MOUSE_FILTER_STOP
 
 
 func cell_rect(p: Vector2i) -> Rect2:
 	return Rect2(p.x * S, (R.H - p.y) * S, S, S)
-
-
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var c := int(event.position.x / S)
-		var r := R.H - int(event.position.y / S)
-		if c >= 0 and c < R.W and r >= 1 and r <= R.H:
-			cell_clicked.emit(Vector2i(c, r))
 
 
 func _draw() -> void:
