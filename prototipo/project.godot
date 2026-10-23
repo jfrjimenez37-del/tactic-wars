@@ -8,6 +8,7 @@ config/name="Tactic Wars (capa 0)"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 run/main_scene="res://ui/main.tscn"
 config/icon="res://icons/icon.png"
+config/quit_on_go_back=false
 
 [display]
 

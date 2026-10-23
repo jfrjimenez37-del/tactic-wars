@@ -2,7 +2,8 @@ extends Control
 ## Pantalla de preparación (sec. 3 del reglamento): cada jugador elige en secreto 4 equipos, 2 tropas a pie,
 ## el equipo en el que empieza su personaje y sus 3 cartas. Emite done al pulsar Continuar.
 
-signal done(army: Array, deck: Array, vs_ai: bool, clock: bool)
+signal done(army: Array, deck: Array, vs_ai: bool, clock: bool, difficulty: String)
+signal back
 
 const R = preload("res://core/tw_rules.gd")
 const Art = preload("res://ui/art.gd")
@@ -33,6 +34,7 @@ var side := 0
 var ask_rival := true
 var vs_ai := true
 var clock := false
+var difficulty := "normal"
 var counts := {}
 var hero := "T"
 var deck := []
@@ -44,6 +46,8 @@ var hero_box: HBoxContainer
 var card_buttons := {}
 var rival_buttons := []
 var clock_button: Button
+var diff_buttons := []
+var diff_label: Label
 var tabs: TabContainer
 var status_label: Label
 var continue_button: Button
@@ -186,13 +190,26 @@ func _build(first: int) -> void:
 	draw.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	draw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(draw)
-	if ask_rival:
+	if ask_rival:                                       # rival, dificultad y reloj (solo en la pantalla de Jade)
+		var opts := HBoxContainer.new()
+		opts.add_theme_constant_override("separation", 8)
+		root.add_child(opts)
 		for opt in [[true, "Contra la IA"], [false, "2 jugadores"]]:
 			var b := _toggle(_button(opt[1], _set_rival.bind(opt[0]), Vector2(170, 52)))
-			head.add_child(b)
+			opts.add_child(b)
 			rival_buttons.append(b)
+		diff_label = _label("   Dificultad:", 19, Color("c8c8c8"))
+		diff_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		opts.add_child(diff_label)
+		for d in [["facil", "Fácil"], ["normal", "Normal"], ["dificil", "Difícil"]]:
+			var b := _toggle(_button(d[1], _set_difficulty.bind(d[0]), Vector2(120, 52)))
+			opts.add_child(b)
+			diff_buttons.append([d[0], b])
+		var gap := Control.new()
+		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		opts.add_child(gap)
 		clock_button = _toggle(_button("Reloj 25 s", _toggle_clock, Vector2(160, 52)))
-		head.add_child(clock_button)
+		opts.add_child(clock_button)
 
 	tabs = TabContainer.new()
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -269,7 +286,9 @@ func _build(first: int) -> void:
 
 	# pie: estado y continuar
 	var foot := HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 12)
 	root.add_child(foot)
+	foot.add_child(_button("Menú", func(): back.emit(), Vector2(120, 56)))
 	status_label = _label("", 19)
 	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	status_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -324,6 +343,11 @@ func _count_row(t: String) -> HBoxContainer:
 
 
 # ------------------------------------------------------------------ interacción
+func _set_difficulty(d: String) -> void:
+	difficulty = d
+	_update()
+
+
 func _toggle_clock() -> void:
 	clock = not clock
 	_update()
@@ -375,7 +399,7 @@ func _on_continue() -> void:
 	if is_valid():
 		var d := deck.duplicate()
 		d.sort()
-		done.emit(army(), d, vs_ai, clock)
+		done.emit(army(), d, vs_ai, clock, difficulty)
 
 
 func _update() -> void:
@@ -383,6 +407,11 @@ func _update() -> void:
 		rival_buttons[i].button_pressed = (i == 0) == vs_ai
 	if clock_button != null:
 		clock_button.button_pressed = clock
+	for e in diff_buttons:
+		e[1].button_pressed = e[0] == difficulty
+		e[1].visible = vs_ai
+	if diff_label != null:
+		diff_label.visible = vs_ai
 	tabs.set_tab_title(0, "1. Ejército")
 	tabs.set_tab_title(1, "2. Cartas (%d/3)" % deck.size())
 	for t in counts:

@@ -8,6 +8,13 @@ const SetupScreen = preload("res://ui/setup_screen.gd")
 const BoardCamera = preload("res://ui/board_camera.gd")
 const Art = preload("res://ui/art.gd")
 const Sfx = preload("res://ui/sfx.gd")
+const MenuScreen = preload("res://ui/menu_screen.gd")
+const SAVE_PATH := "user://partida.json"
+const SETTINGS_PATH := "user://ajustes.cfg"
+## Dificultad de la IA (medida en el simulador contra la Normal, 200 partidas por nivel):
+## Fácil gana ~28 %, Difícil ~62 %. Menos ruido que el normal no la hace más fuerte; el estilo agresivo sí.
+const DIFFICULTY := {"facil": ["normal", 1.5], "normal": ["normal", 0.3], "dificil": ["agresivo", 0.3]}
+const DIFF_NAME := {"facil": "Fácil", "normal": "Normal", "dificil": "Difícil"}
 const FONT := 21              # tamaño de letra base (legible en el móvil)
 const PANEL_W := 420
 const TURN_TIME := 25.0       # C13: 25 s por turno y 60 s de reserva por partida
@@ -38,6 +45,10 @@ var end_button: Button
 var overlay: Control
 var overlay_box: PanelContainer
 var vs_ai := true
+var difficulty := "normal"
+var saving := true            # autoguardado (las pruebas automáticas lo desactivan)
+var session := 0              # cambia al salir al menú o empezar otra partida: corta los turnos de la IA en marcha
+var anim_mode := "normal"     # ajustes: normal | rapidas | no
 var phase := "play"           # setup | deploy | play
 var first := 0                # quién juega primero (sorteo)
 var choices := [{}, {}]       # por bando: {army, deck}
@@ -64,18 +75,26 @@ func _ready() -> void:
 	_build_ui()
 	var args := OS.get_cmdline_user_args()
 	var quick := false
+	var setup_test := false
 	for a in args:
 		if a.begins_with("--demo=") or a == "--autoplay" or a.begins_with("--select="):
 			quick = true
+		if a.begins_with("--setup-test="):
+			setup_test = true
+	saving = args.is_empty() or args.has("--setup-test=resume")   # las pruebas no tocan la partida guardada
+	if args.is_empty():
+		_load_settings()
 	for a in args:
 		if a.begins_with("--demo="):
 			anim = false
 		if a == "--autoplay" or a.begins_with("--setup-test="):
 			board.speed = 3.0
-	if quick:
+	if setup_test:
+		_start_setup()
+	elif quick:
 		_new_game()
 	else:
-		_start_setup()
+		_show_menu()
 	for a in args:
 		if a.begins_with("--setup-test="):
 			await _setup_test(a.substr(13))
@@ -130,9 +149,15 @@ func _build_ui() -> void:
 	sound_button.focus_mode = Control.FOCUS_NONE
 	sound_button.custom_minimum_size = Vector2(150, 0)
 	sound_button.pressed.connect(func():
-		sfx.enabled = not sfx.enabled
-		sound_button.text = "Sonido: sí" if sfx.enabled else "Sonido: no")
+		_apply_settings(not sfx.enabled, anim_mode)
+		_save_settings())
 	top.add_child(sound_button)
+	var menu_button := Button.new()
+	menu_button.text = "Menú"
+	menu_button.focus_mode = Control.FOCUS_NONE
+	menu_button.custom_minimum_size = Vector2(100, 0)
+	menu_button.pressed.connect(_go_menu)
+	top.add_child(menu_button)
 	sfx = Sfx.new()
 	add_child(sfx)
 	var body := HBoxContainer.new()
@@ -203,7 +228,7 @@ func _new_game() -> void:
 	game = TWSetup.new_game("equilibrado4", "hacker4", ["aereo", "reparacion", "torreta"],
 		["hackeo", "misiles", "pem"], 0)
 	board.game = game
-	bots = [TWBot.new(game, 0, "normal", randi()), TWBot.new(game, 1, "normal", randi())]
+	_make_bots()
 	history = ["Empieza la partida. Juega la " + SIDE_NAME[game.current] + "."]
 	overlay.visible = false
 	_reset_selection()
@@ -478,6 +503,8 @@ func _do(a: Dictionary) -> void:
 	history.append("%s: %s" % [who, label])
 	_report_events()
 	_reset_selection()
+	if a.kind != "end":
+		_save_game()
 	if anim and phase == "play":
 		_animate(a, evs, pre, path)
 
@@ -511,7 +538,7 @@ func _animate(a: Dictionary, evs: Array, pre: Dictionary, path: Array) -> void:
 	for e in evs:
 		est += {"hit": 0.52, "kill": 0.42, "turret_fire": 0.52, "turret_hit": 0.52, "capture": 0.42, "card": 0.37}.get(e[0], 0.05)
 	var base_speed: float = board.speed
-	board.speed = base_speed * maxf(1.0, est / 2.6)          # margen para no pasar de 3 s
+	board.speed = base_speed * maxf(1.0, est / 2.4)          # margen para no pasar de 3 s
 	var at := {}                                          # dónde está cada unidad durante la animación
 	for id in pre:
 		var u: TWUnit = pre[id]
@@ -640,9 +667,12 @@ func _report_events() -> void:
 func _on_end_turn() -> void:
 	if game.winner != TWGame.NO_WINNER or busy or ending:
 		return
+	var my := session
 	ending = true
 	_do(TWGame.act("end"))
 	await _idle()
+	if my != session:
+		return
 	if game.winner == TWGame.NO_WINNER:
 		game.start_turn()
 		sfx.play("turn", -6.0)
@@ -652,13 +682,15 @@ func _on_end_turn() -> void:
 		_refresh()
 		if vs_ai and game.current == 1:
 			await get_tree().create_timer(0.3).timeout
-			_ai_turn()
+			if my == session:
+				_ai_turn()
 	else:
 		ending = false
 		_refresh()
 
 
 func _ai_turn() -> void:
+	var my := session
 	var guard := 0
 	bots[1].begin_turn()
 	while game.winner == TWGame.NO_WINNER and game.current == 1 and guard < 60:
@@ -667,12 +699,16 @@ func _ai_turn() -> void:
 		if a.kind == "end":
 			break
 		var where = a.dest if a.dest != null else (game.units[a.unit].pos if a.unit >= 0 else null)
-		if where != null and not camera.is_cell_visible(where):      # la cámara sigue a la IA
+		if anim and where != null and not camera.is_cell_visible(where):      # la cámara sigue a la IA
 			camera.center_on(where)
-			await get_tree().create_timer(0.35).timeout
+			await get_tree().create_timer(0.35 / board.speed).timeout
+			if my != session:
+				return
 		_do(a)
 		await _idle()
 		await get_tree().create_timer(0.2 / board.speed).timeout
+		if my != session:
+			return
 	_on_end_turn()
 
 
@@ -697,6 +733,7 @@ func _focus_cell():
 ## Al empezar el turno de una persona: reloj a 25 s y cámara sobre su personaje.
 func _turn_started() -> void:
 	turn_left = TURN_TIME
+	_save_game()
 	if _is_human(game.current):
 		camera.center_on(_focus_cell())
 
@@ -828,13 +865,15 @@ func _show_winner() -> void:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vb.add_child(l)
 	vb.add_theme_constant_override("separation", 18)
-	var b := Button.new()
-	b.text = "Nueva partida"
-	b.custom_minimum_size = Vector2(0, 56)
-	b.pressed.connect(_start_setup)
-	vb.add_child(b)
+	for opt in [["Nueva partida", _start_setup], ["Menú", _go_menu]]:
+		var b := Button.new()
+		b.text = opt[0]
+		b.custom_minimum_size = Vector2(0, 56)
+		b.pressed.connect(opt[1])
+		vb.add_child(b)
 	overlay_box.add_child(vb)
 	overlay.visible = true
+	_delete_save()
 
 
 # ------------------------------------------------------------------ preparación y despliegue (sec. 3)
@@ -854,6 +893,7 @@ func _show_setup(side: int, ask_rival: bool) -> void:
 	add_child(sc)
 	sc.setup(side, first, ask_rival)
 	sc.done.connect(_on_setup_done.bind(side))
+	sc.back.connect(_go_menu)
 
 
 func _clear_screen() -> void:
@@ -903,12 +943,13 @@ func _pass_screen(text: String, next: Callable) -> void:
 
 
 ## Orden: Jade elige; con dos jugadores, Ámbar elige y despliega, y después despliega Jade.
-func _on_setup_done(army: Array, deck: Array, ai: bool, clock: bool, side: int) -> void:
+func _on_setup_done(army: Array, deck: Array, ai: bool, clock: bool, diff: String, side: int) -> void:
 	choices[side] = {"army": army, "deck": deck}
 	_clear_screen()
 	if side == 0:
 		vs_ai = ai
 		clock_on = clock
+		difficulty = diff
 		if vs_ai:
 			choices[1] = {"army": TWSetup.random_army(), "deck": TWSetup.random_deck()}
 			cells[1] = _auto_all(1)
@@ -1064,11 +1105,14 @@ func _army_text(side: int) -> String:
 func _begin_play() -> void:
 	game = TWSetup.build([choices[0].army, choices[1].army], [choices[0].deck, choices[1].deck], cells, first)
 	board.game = game
-	bots = [TWBot.new(game, 0, "normal", randi()), TWBot.new(game, 1, "normal", randi())]
+	_make_bots()
+	session += 1
 	phase = "play"
 	end_button.visible = true
 	overlay.visible = false
 	history = [_army_text(0), _army_text(1), "Sorteo: empieza la %s." % SIDE_NAME[first]]
+	if vs_ai:
+		history.append("Dificultad de la IA: %s." % DIFF_NAME[difficulty])
 	reserve = [RESERVE_TIME, RESERVE_TIME]
 	_turn_started()
 	if not _is_human(game.current):
@@ -1093,6 +1137,8 @@ func _setup_test(stage: String) -> void:
 		sc.card_buttons[c].pressed.emit()
 	if stage == "hotseat":
 		sc.rival_buttons[1].pressed.emit()
+	if stage == "resume":
+		sc._set_difficulty("dificil")
 	if stage == "clock":
 		sc.clock_button.pressed.emit()
 	if stage == "setup":
@@ -1115,6 +1161,9 @@ func _setup_test(stage: String) -> void:
 	_deploy_done()
 	if stage == "clock":
 		await _clock_test()
+		return
+	if stage == "resume":
+		await _resume_test()
 		return
 	var types := []
 	for u in game.on_board(0):
@@ -1189,3 +1238,159 @@ func _anim_shot(path: String, args: Array) -> void:
 	await _idle()
 	print("Captura de animación: ", action_label_fallback(attack))
 	get_tree().quit()
+
+
+# ------------------------------------------------------------------ menú, ajustes y partida guardada
+## Jade (solo la usan las pruebas) juega en normal; Ámbar, con la dificultad elegida.
+func _make_bots() -> void:
+	var d: Array = DIFFICULTY[difficulty]
+	bots = [TWBot.new(game, 0, "normal", randi()), TWBot.new(game, 1, d[0], randi(), d[1])]
+
+
+func _show_menu() -> void:
+	session += 1
+	phase = "menu"
+	overlay.visible = false
+	_clear_screen()
+	var m := MenuScreen.new()
+	screen = m
+	add_child(m)
+	m.setup(_save_summary(), sfx.enabled, anim_mode)
+	m.continue_game.connect(_continue_game)
+	m.new_game.connect(_start_setup)
+	m.settings_changed.connect(func(snd: bool, am: String):
+		_apply_settings(snd, am)
+		_save_settings())
+
+
+## Vuelve al menú (la partida ya está guardada). Espera a que acabe la animación en curso.
+func _go_menu() -> void:
+	if phase == "menu":
+		return
+	await _idle()
+	busy = false
+	ending = false
+	_show_menu()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:          # botón «atrás» de Android
+		if phase == "menu":
+			get_tree().quit()
+		else:
+			_go_menu()
+
+
+func _apply_settings(snd: bool, am: String) -> void:
+	sfx.enabled = snd
+	sound_button.text = "Sonido: sí" if snd else "Sonido: no"
+	anim_mode = am
+	anim = am != "no"
+	board.speed = 2.0 if am == "rapidas" else 1.0
+
+
+func _load_settings() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK:
+		_apply_settings(cfg.get_value("ajustes", "sonido", true), cfg.get_value("ajustes", "animaciones", "normal"))
+
+
+func _save_settings() -> void:
+	if not saving:
+		return
+	var cfg := ConfigFile.new()
+	cfg.set_value("ajustes", "sonido", sfx.enabled)
+	cfg.set_value("ajustes", "animaciones", anim_mode)
+	cfg.save(SETTINGS_PATH)
+
+
+## Guarda la partida en curso (después de cada acción y al empezar cada turno).
+func _save_game() -> void:
+	if not saving or phase != "play" or game == null or game.winner != TWGame.NO_WINNER:
+		return
+	var data := {"game": TWSave.to_dict(game), "vs_ai": vs_ai, "difficulty": difficulty, "clock_on": clock_on,
+		"turn_left": turn_left, "reserve": reserve, "first": first, "choices": choices,
+		"rng": [bots[0].rng.state, bots[1].rng.state], "history": history.slice(maxi(0, history.size() - 40))}
+	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify(data))
+
+
+func _load_save():
+	if not FileAccess.file_exists(SAVE_PATH):
+		return null
+	var data = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	if typeof(data) != TYPE_DICTIONARY or not data.has("game") or int(data.game.get("version", 0)) != TWSave.VERSION:
+		return null
+	return data
+
+
+func _delete_save() -> void:
+	if saving and FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+
+
+func _save_summary() -> String:
+	var data = _load_save()
+	if data == null:
+		return ""
+	var g: Dictionary = data.game
+	var rival: String = ("contra la IA (%s)" % DIFF_NAME.get(data.difficulty, "Normal")) if data.vs_ai else "2 jugadores"
+	return "Ronda %d/%d · %s" % [mini(int(g.round), R.ROUNDS), R.ROUNDS, rival]
+
+
+func _continue_game() -> void:
+	var data = _load_save()
+	if data == null:
+		_start_setup()
+		return
+	_clear_screen()
+	game = TWSave.from_dict(data.game)
+	vs_ai = data.vs_ai
+	difficulty = data.difficulty
+	clock_on = data.clock_on
+	turn_left = float(data.turn_left)
+	reserve = [float(data.reserve[0]), float(data.reserve[1])]
+	first = int(data.first)
+	choices = data.choices
+	board.game = game
+	_make_bots()
+	for s in [0, 1]:
+		bots[s].rng.state = int(data.rng[s])
+	history = data.history
+	history.append("— Partida recuperada —")
+	session += 1
+	phase = "play"
+	end_button.visible = true
+	overlay.visible = false
+	busy = false
+	ending = false
+	_reset_selection()
+	camera.center_on(_focus_cell(), false)
+	if vs_ai and game.current == 1:
+		await get_tree().create_timer(0.4).timeout
+		_ai_turn()
+
+
+## Juega unas acciones, sale al menú y continúa: la partida recuperada debe ser idéntica.
+func _resume_test() -> void:
+	while game.current != 0 or busy or ending:
+		await get_tree().process_frame
+	bots[0].begin_turn()
+	for i in range(3):
+		var a: Dictionary = bots[0].choose()
+		if a.kind == "end":
+			break
+		_do(a)
+		await _idle()
+	var before := game.canonical()
+	var rng_before: int = bots[1].rng.state
+	await _go_menu()
+	var summary := _save_summary()
+	var menu_ok: bool = phase == "menu" and screen.continue_button.visible
+	screen.continue_button.pressed.emit()
+	await get_tree().process_frame
+	print("Reanudar: menú %s («%s»), estado igual %s, azar de la IA igual %s, dificultad %s (%s, ruido %.1f)" % [
+		menu_ok, summary, game.canonical() == before, bots[1].rng.state == rng_before, difficulty,
+		bots[1].base_w == TWBot.STYLES["agresivo"], bots[1].noise])
+	_delete_save()
