@@ -14,7 +14,8 @@ hacker, evolución de la tripulación, economía, escalada de PM, límites, domi
 | `core/tw_setup.gd` | Creación de partidas, zona de despliegue y despliegue automático. |
 | `core/tw_save.gd` | Guarda y recupera el estado completo de una partida (JSON). |
 | `core/tw_bot.gd`, `core/tw_rng.gd` | IA: traducción exacta de los bots del simulador, con el mismo generador de azar. |
-| `ui/menu_screen.gd` | Menú principal: continuar, nueva partida y ajustes (sonido y animaciones). |
+| `ui/menu_screen.gd` | Menú principal: continuar, nueva partida, tutorial y ajustes (sonido y animaciones). |
+| `ui/tutorial.gd` | Tutorial: 7 lecciones con su escenario, casillas resaltadas y solo la acción que se enseña. |
 | `ui/setup_screen.gd` | Pantalla de preparación: ejército, equipo del personaje, 3 cartas y rival. |
 | `ui/main.tscn`, `ui/main.gd` | Despliegue y pantalla de partida: barra superior, panel de acciones, cartas, registro y fin de partida. |
 | `ui/board_view.gd` | Dibujo del tablero, las unidades, las torretas y los resaltados. |
@@ -36,6 +37,11 @@ hacker, evolución de la tripulación, economía, escalada de PM, límites, domi
 «Ajustes» (sonido; animaciones normales, rápidas o sin animaciones). La partida se guarda sola después
 de cada acción y al empezar cada turno, así que se puede salir en cualquier momento (botón «Menú» o
 «atrás» de Android) y seguir después. Al terminar la partida se borra la guardada.
+
+**Tutorial** (en el menú). Siete lecciones cortas, cada una con su propio escenario en el mapa: mover,
+atacar, capturar (y la torreta de las plazas), fabricar, cartas, tripulación y personaje, y cómo se gana.
+La casilla que hay que tocar late en amarillo y solo se permite la acción de la lección. Al terminar,
+propone una partida de práctica contra la IA en Fácil.
 
 **Dificultad de la IA** (en la preparación, contra la IA). Medida en el simulador, 200 partidas por
 nivel contra la IA normal:
@@ -102,6 +108,7 @@ godot --path . -- --setup-test=hotseat               # lo mismo con dos jugadore
 godot --path . -- --setup-test=clock                 # reloj activado: comprueba que el turno pasa solo
 godot --path . -- --setup-test=resume                # sale al menú a mitad de partida y la continúa
 godot --headless --path . --script res://tests/run_save.gd
+godot --path . -- --tutorial-test=0                  # recorre el tutorial entero tocando lo resaltado
 godot --headless --path . --script res://tests/run_camera.gd
 godot --headless --path . --script res://tests/run_sfx.gd
 godot --path . -- --demo=0 --anim-shot=a.png --anim-at=1.0   # captura a mitad de un ataque animado
@@ -130,9 +137,10 @@ Para cambiar o añadir arte: deja los archivos con sus nombres en una carpeta co
 
 ## Pendiente
 
-1. Arte: las 10 cartas como ilustraciones individuales a 512×768 (ahora son recortes de una lámina) y la
+1. Sonido y música de la otra IA (prompts en `../arte/PROMPTS_AUDIO.md`).
+2. Arte: las 10 cartas como ilustraciones individuales a 512×768 (ahora son recortes de una lámina) y la
    artillería de Ámbar con la misma forma que la de Jade. Música.
-2. Ajustes tras probar en el móvil.
+3. Más mapas (candidatos simulados en `../simulador/experimentos/RESULTADOS_MAPAS.md`).
 
 ## Exportar a Android
 

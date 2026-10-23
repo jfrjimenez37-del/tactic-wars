@@ -9,6 +9,7 @@ const BoardCamera = preload("res://ui/board_camera.gd")
 const Art = preload("res://ui/art.gd")
 const Sfx = preload("res://ui/sfx.gd")
 const MenuScreen = preload("res://ui/menu_screen.gd")
+const Tutorial = preload("res://ui/tutorial.gd")
 const SAVE_PATH := "user://partida.json"
 const SETTINGS_PATH := "user://ajustes.cfg"
 ## Dificultad de la IA (medida en el simulador contra la Normal, 200 partidas por nivel):
@@ -49,6 +50,10 @@ var difficulty := "normal"
 var saving := true            # autoguardado (las pruebas automáticas lo desactivan)
 var session := 0              # cambia al salir al menú o empezar otra partida: corta los turnos de la IA en marcha
 var anim_mode := "normal"     # ajustes: normal | rapidas | no
+var tutorial = null           # Tutorial en marcha (o null)
+var tut_panel: PanelContainer
+var tut_label: Label
+var tut_buttons: HBoxContainer
 var phase := "play"           # setup | deploy | play
 var first := 0                # quién juega primero (sorteo)
 var choices := [{}, {}]       # por bando: {army, deck}
@@ -81,6 +86,8 @@ func _ready() -> void:
 			quick = true
 		if a.begins_with("--setup-test="):
 			setup_test = true
+		if a.begins_with("--tutorial-test="):
+			quick = true
 	saving = args.is_empty() or args.has("--setup-test=resume")   # las pruebas no tocan la partida guardada
 	if args.is_empty():
 		_load_settings()
@@ -107,6 +114,9 @@ func _ready() -> void:
 	for a in args:
 		if a.begins_with("--select="):
 			_on_cell(R.cell(a.substr(9)))
+	for a in args:
+		if a.begins_with("--tutorial-test="):
+			await _tutorial_test(int(a.substr(16)))
 	for a in args:
 		if a.begins_with("--anim-shot="):
 			await _anim_shot(a.substr(12), args)
@@ -170,6 +180,32 @@ func _build_ui() -> void:
 	camera.on_focus = _focus_cell
 	body.add_child(camera)
 	board = camera.board
+	tut_panel = PanelContainer.new()                  # recuadro de instrucciones del tutorial, abajo del tablero
+	var tbox := StyleBoxFlat.new()
+	tbox.bg_color = Color(0.08, 0.1, 0.12, 0.92)
+	tbox.border_color = Color("ffd84a")
+	tbox.set_border_width_all(2)
+	tbox.set_corner_radius_all(8)
+	tbox.set_content_margin_all(14)
+	tut_panel.add_theme_stylebox_override("panel", tbox)
+	tut_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	tut_panel.offset_left = 10
+	tut_panel.offset_right = -10
+	tut_panel.offset_bottom = -10
+	tut_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	tut_panel.visible = false
+	camera.add_child(tut_panel)
+	var tcol := HBoxContainer.new()
+	tcol.add_theme_constant_override("separation", 12)
+	tut_panel.add_child(tcol)
+	tut_label = Label.new()
+	tut_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tut_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tut_label.custom_minimum_size = Vector2(300, 0)
+	tcol.add_child(tut_label)
+	tut_buttons = HBoxContainer.new()
+	tut_buttons.add_theme_constant_override("separation", 8)
+	tcol.add_child(tut_buttons)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(PANEL_W + 24, 0)
 	body.add_child(panel)
@@ -443,6 +479,7 @@ func _on_cell(p: Vector2i) -> void:
 			if a.kind == "activate" and a.unit == u.id:
 				pending.append(a)
 		_refresh()
+		_tut_event("select", u.id)
 		return
 	if game.owner.has(p) and game.owner[p] == game.current:
 		_select_building(p)
@@ -464,6 +501,7 @@ func _select_building(p: Vector2i) -> void:
 	if pending.is_empty():
 		history.append("Ese edificio no puede fabricar ahora (encargo pendiente, sin PM, sin suministros o en el límite).")
 	_refresh()
+	_tut_event("building", p)
 
 
 func _start_card(c: String) -> void:
@@ -476,6 +514,7 @@ func _start_card(c: String) -> void:
 		if a.kind == "card" and a.sub == c:
 			pending.append(a)
 	_refresh()
+	_tut_event("card", c)
 
 
 func _start_dismount(sub: String) -> void:
@@ -490,6 +529,9 @@ func _start_dismount(sub: String) -> void:
 
 
 func _do(a: Dictionary) -> void:
+	if tutorial != null and not tutorial.allows(a):
+		_tut_nope()
+		return
 	var who: String = SIDE_NAME[game.current].split(" ")[1]
 	var label := action_label(a)
 	var pre := _snapshot()
@@ -507,6 +549,8 @@ func _do(a: Dictionary) -> void:
 		_save_game()
 	if anim and phase == "play":
 		_animate(a, evs, pre, path)
+	if tutorial != null and a.kind != "end":
+		_tut_after_action(a)
 
 
 ## Copia de las unidades antes de una acción (para animar las que se mueven, mueren o salen de un vehículo).
@@ -666,6 +710,17 @@ func _report_events() -> void:
 
 func _on_end_turn() -> void:
 	if game.winner != TWGame.NO_WINNER or busy or ending:
+		return
+	if tutorial != null:                                   # en el tutorial no juega nadie más
+		if not tutorial.allows(TWGame.act("end")):
+			_tut_nope()
+			return
+		ending = true
+		_do(TWGame.act("end"))
+		await _idle()
+		ending = false
+		_refresh()
+		_tut_event("end")
 		return
 	var my := session
 	ending = true
@@ -877,12 +932,15 @@ func _show_winner() -> void:
 
 
 # ------------------------------------------------------------------ preparación y despliegue (sec. 3)
-func _start_setup() -> void:
+func _start_setup(diff := "") -> void:
+	_end_tutorial()
 	overlay.visible = false
 	first = randi() % 2                      # se sortea quién juega primero
 	choices = [{}, {}]
 	cells = [[], []]
 	_show_setup(0, true)
+	if diff != "":
+		screen._set_difficulty(diff)
 
 
 func _show_setup(side: int, ask_rival: bool) -> void:
@@ -1258,6 +1316,7 @@ func _show_menu() -> void:
 	m.setup(_save_summary(), sfx.enabled, anim_mode)
 	m.continue_game.connect(_continue_game)
 	m.new_game.connect(_start_setup)
+	m.tutorial.connect(_start_tutorial)
 	m.settings_changed.connect(func(snd: bool, am: String):
 		_apply_settings(snd, am)
 		_save_settings())
@@ -1270,6 +1329,7 @@ func _go_menu() -> void:
 	await _idle()
 	busy = false
 	ending = false
+	_end_tutorial()
 	_show_menu()
 
 
@@ -1306,7 +1366,7 @@ func _save_settings() -> void:
 
 ## Guarda la partida en curso (después de cada acción y al empezar cada turno).
 func _save_game() -> void:
-	if not saving or phase != "play" or game == null or game.winner != TWGame.NO_WINNER:
+	if not saving or tutorial != null or phase != "play" or game == null or game.winner != TWGame.NO_WINNER:
 		return
 	var data := {"game": TWSave.to_dict(game), "vs_ai": vs_ai, "difficulty": difficulty, "clock_on": clock_on,
 		"turn_left": turn_left, "reserve": reserve, "first": first, "choices": choices,
@@ -1394,3 +1454,145 @@ func _resume_test() -> void:
 		menu_ok, summary, game.canonical() == before, bots[1].rng.state == rng_before, difficulty,
 		bots[1].base_w == TWBot.STYLES["agresivo"], bots[1].noise])
 	_delete_save()
+
+
+# ------------------------------------------------------------------ tutorial
+func _start_tutorial() -> void:
+	tutorial = Tutorial.new()
+	_load_lesson(0)
+
+
+func _load_lesson(n: int) -> void:
+	var g: TWGame = tutorial.build(n)
+	_clear_screen()
+	session += 1
+	game = g
+	board.game = g
+	vs_ai = true
+	clock_on = false
+	difficulty = "normal"
+	_make_bots()
+	phase = "play"
+	busy = false
+	ending = false
+	overlay.visible = false
+	end_button.visible = true
+	history = ["Tutorial · lección %d de %d" % [n + 1, tutorial.lessons.size()]]
+	_reset_selection()
+	var h: Array = tutorial.hints()
+	camera.center_on(h[0] if not h.is_empty() else _focus_cell(), false)
+	_tut_refresh()
+
+
+func _end_tutorial() -> void:
+	tutorial = null
+	if tut_panel != null:
+		tut_panel.visible = false
+	if board != null:
+		board.hint_cells = []
+
+
+func _tut_refresh() -> void:
+	if tutorial == null:
+		return
+	var s: Dictionary = tutorial.current()
+	tut_panel.visible = true
+	tut_label.text = s.text
+	for c in tut_buttons.get_children():
+		c.queue_free()
+	var opts := []
+	if s.type == "button":
+		opts.append(["Siguiente", func(): _tut_event("button")])
+	if s.type == "final":
+		opts.append(["Partida de práctica", func(): _start_setup("facil")])
+		opts.append(["Menú", _go_menu])
+	else:
+		opts.append(["Salir", _go_menu])
+	for o in opts:
+		var b := Button.new()
+		b.text = o[0]
+		b.custom_minimum_size = Vector2(150, 56)
+		b.pressed.connect(o[1])
+		tut_buttons.add_child(b)
+	board.hint_cells = tutorial.hints()
+	board.queue_redraw()
+
+
+func _tut_event(kind: String, value = null) -> void:
+	if tutorial == null or not tutorial.notify(kind, value):
+		return
+	match tutorial.advance():
+		"step":
+			_tut_refresh()
+		"lesson":
+			_load_lesson(tutorial.lesson + 1)
+
+
+func _tut_after_action(a: Dictionary) -> void:
+	var t = tutorial
+	await _idle()
+	if tutorial == t:
+		_tut_event("action", a)
+
+
+func _tut_nope() -> void:
+	info_label.text = "En el tutorial, sigue las indicaciones del recuadro amarillo."
+	sfx.play("tick")
+
+
+## Recorre el tutorial como un jugador (tocando lo resaltado) y se para tras stop pasos (0 = hasta el final).
+func _tutorial_test(stop: int) -> void:
+	_start_tutorial()
+	var steps := 0
+	var lessons_done := 0
+	while tutorial != null and (stop == 0 or steps < stop):
+		await get_tree().process_frame
+		await _idle()
+		var s: Dictionary = tutorial.current()
+		var lesson_before: int = tutorial.lesson
+		var step_before: int = tutorial.step
+		match s.type:
+			"button":
+				tut_buttons.get_children().filter(func(b): return not b.is_queued_for_deletion())[0].pressed.emit()
+			"select":
+				_on_cell(game.units[tutorial.tags[s.tag]].pos)
+			"building":
+				_on_cell(s.cell)
+			"card":
+				_start_card(s.card)
+			"end":
+				await _on_end_turn()
+			"action":
+				var chosen = null
+				for a in game.legal_actions():
+					if tutorial.allows(a):
+						chosen = a
+						break
+				if chosen == null:
+					print("FALLO: ninguna acción legal cumple el paso %d.%d" % [tutorial.lesson + 1, tutorial.step + 1])
+					return
+				match chosen.kind:
+					"card":
+						_start_card(chosen.sub)
+						_on_cell(chosen.dest)
+					"dismount":
+						_on_cell(game.units[chosen.unit].pos)
+						_start_dismount(chosen.sub)
+						_on_cell(chosen.dest)
+					_:
+						_do(chosen)
+				if game.log.is_empty() or TWGame.action_key(game.log[-1]) != TWGame.action_key(chosen):
+					print("FALLO: la acción no se aplicó: ", TWGame.action_key(chosen))
+					return
+			"final":
+				print("Tutorial: %d lecciones completadas, %d pasos, final alcanzado" % [lessons_done + 1, steps])
+				return
+		await _idle()
+		await get_tree().process_frame
+		if tutorial.lesson == lesson_before and tutorial.step == step_before:
+			print("FALLO: el paso %d.%d (%s) no avanzó" % [lesson_before + 1, step_before + 1, s.type])
+			return
+		if tutorial.lesson != lesson_before:
+			lessons_done += 1
+		steps += 1
+	print("Tutorial detenido en la lección %d, paso %d" % [tutorial.lesson + 1, tutorial.step + 1])

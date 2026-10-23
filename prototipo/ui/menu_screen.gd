@@ -3,6 +3,7 @@ extends Control
 
 signal continue_game
 signal new_game
+signal tutorial
 signal settings_changed(sound: bool, anim_mode: String)
 
 const Art = preload("res://ui/art.gd")
@@ -57,6 +58,7 @@ func setup(saved: String, p_sound: bool, p_anim: String) -> void:
 	continue_button.custom_minimum_size.y = 80
 	main_box.add_child(continue_button)
 	main_box.add_child(_button("Nueva partida", func(): new_game.emit()))
+	main_box.add_child(_button("Tutorial", func(): tutorial.emit()))
 	main_box.add_child(_button("Ajustes", func(): _show_settings(true)))
 
 	settings_box = VBoxContainer.new()

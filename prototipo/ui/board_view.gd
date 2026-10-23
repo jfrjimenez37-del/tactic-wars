@@ -19,6 +19,7 @@ var speed := 1.0                   # 1 = velocidad normal; las pruebas automáti
 var ghosts := []                   # {u: TWUnit (copia), c: Vector2 centro, k: escala}
 var hidden_units := {}                   # id -> true
 var effects := []                  # {kind, t0, dur, ...}
+var hint_cells := []               # tutorial: casillas que hay que tocar
 
 
 func _ready() -> void:
@@ -83,6 +84,9 @@ func _draw() -> void:
 		_draw_unit(gh.u, font, Vector2.ZERO)
 		draw_set_transform(Vector2.ZERO)
 	_draw_effects(font)
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 160.0)
+	for p in hint_cells:
+		draw_rect(cell_rect(p).grow(-3), Color(1.0, 0.85, 0.2, 0.55 + 0.45 * pulse), false, 6)
 
 
 func _draw_unit(u: TWUnit, font: Font, c: Vector2) -> void:
@@ -201,7 +205,7 @@ func center(p: Vector2i) -> Vector2:
 
 
 func _process(_delta: float) -> void:
-	if effects.is_empty() and ghosts.is_empty():
+	if effects.is_empty() and ghosts.is_empty() and hint_cells.is_empty():
 		return
 	var now := Time.get_ticks_msec()
 	effects = effects.filter(func(e): return now - e.t0 < e.dur * 1000.0)
