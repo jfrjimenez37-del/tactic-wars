@@ -178,3 +178,21 @@ edges` + paleta.
 
 Con las unidades, el terreno y los edificios ya se puede sustituir todo el dibujo actual del tablero;
 cartas, efectos e interfaz pueden llegar después.
+
+## 9. Revisión de la primera entrega (23-10-2026)
+
+Integrado en el prototipo (versión 0.4). Arreglado con `preparar_arte.py`, sin volver a generar:
+
+- Caminos y ríos no empalmaban (cada pieza tenía la franja a otra altura y con otro ancho): se generan
+  las 16 piezas de cada uno a partir de la textura de la recta, más cuartos de lago y la pasarela.
+- `camino_cruce` y `camino_t` venían con los nombres intercambiados (ya no se usan: se generan).
+- Torreta destruida cortada por los bordes: reducida y centrada.
+- `llanura_2` más clara que `llanura`: igualado el tono.
+- Cartas: recortada la ilustración (sin margen ni rótulo).
+
+Pendiente de generar de nuevo con la otra IA:
+
+1. **Las 10 cartas** como ilustraciones individuales a 512×768 (prompts de la sección 6).
+2. **La artillería de Ámbar** con la misma forma que la de Jade (obús blindado con patas de apoyo),
+   cambiando solo los colores: prompt de la sección 2 con la imagen `unidades/jade_artilleria.png` como
+   referencia y «same vehicle, recolor to the amber faction palette».

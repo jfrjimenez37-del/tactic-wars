@@ -2,16 +2,11 @@ extends Control
 ## Dibuja el tablero, las unidades, las torretas y los resaltados. Los toques los recibe BoardCamera.
 
 const R = preload("res://core/tw_rules.gd")
+const Art = preload("res://ui/art.gd")
 const S := 72                                   # tamaño de casilla en píxeles
 
-const TERRAIN_COLOR := {
-	".": Color("8db360"), "=": Color("c9b48a"), "B": Color("3f7d3a"), "C": Color("a08b5b"),
-	"~": Color("4f86c6"), "P": Color("8b6b45"), "#": Color("555555"), "r": Color("7a7067"),
-	"X": Color("6e4b2a"), "O": Color("8db360"), "H": Color("b9b9b9"), "Q": Color("b9b9b9"), "U": Color("c8c8c8"),
-}
 const SIDE_COLOR := [Color("2fa36b"), Color("e39b2d")]   # Brigada Jade, Legión Ámbar
 const NEUTRAL := Color("e8e8e8")
-const UNIT_LABEL := {"F": "F", "A": "AT", "I": "In", "K": "Hk", "P": "Tr", "C": "★", "J": "J", "T": "T", "R": "Ar"}
 
 var game: TWGame
 var selected := -1                 # id de la unidad seleccionada
@@ -28,6 +23,7 @@ var effects := []                  # {kind, t0, dur, ...}
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(R.W * S, R.H * S)
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS    # el arte de 256 px se ve nítido al reducirlo
 
 
 func cell_rect(p: Vector2i) -> Rect2:
@@ -40,58 +36,39 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	for p in game.terrain:
 		var rect := cell_rect(p)
-		var ch: String = game.terrain[p]
-		draw_rect(rect, TERRAIN_COLOR.get(ch, Color.MAGENTA))
-		match ch:
-			"B":
-				draw_circle(rect.get_center() + Vector2(-12, 6), 10, Color("2e5e2b"))
-				draw_circle(rect.get_center() + Vector2(10, -6), 12, Color("2e5e2b"))
-			"C":
-				draw_colored_polygon(PackedVector2Array([rect.position + Vector2(10, 60), rect.position + Vector2(36, 18),
-					rect.position + Vector2(62, 60)]), Color("8a744a"))
-			"~":
-				for k in range(3):
-					draw_line(rect.position + Vector2(8, 18 + k * 18), rect.position + Vector2(64, 18 + k * 18), Color("7fb0e6"), 2)
-			"P":
-				draw_rect(Rect2(rect.position + Vector2(0, 22), Vector2(S, 28)), Color("a5835a"))
-			"#":
-				draw_rect(rect.grow(-8), Color("777777"))
-			"r":
-				draw_rect(Rect2(rect.position + Vector2(10, 30), Vector2(20, 30)), Color("958a7f"))
-				draw_rect(Rect2(rect.position + Vector2(40, 40), Vector2(22, 20)), Color("958a7f"))
-			"X":
-				draw_line(rect.position + Vector2(10, 10), rect.position + Vector2(62, 62), Color("3b2614"), 6)
-				draw_line(rect.position + Vector2(62, 10), rect.position + Vector2(10, 62), Color("3b2614"), 6)
+		for t in terrain_layers(p):
+			draw_texture_rect(t, rect, false)
 		if game.owner.has(p):
-			var o: int = game.owner[p]
-			var col: Color = NEUTRAL if o < 0 else SIDE_COLOR[o]
-			draw_rect(rect.grow(-3), col, false, 5)
-			var letter: String = {"H": "CG", "Q": "Cu", "U": ""}[ch]
-			if letter != "":
-				draw_string(font, rect.position + Vector2(4, 16), letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.BLACK)
-		draw_rect(rect, Color(0, 0, 0, 0.25), false, 1)
+			var bt := _building_tex(p)
+			if bt != null:
+				draw_texture_rect(bt, rect, false)
+		draw_rect(rect, Color(0, 0, 0, 0.16), false, 1)
 	# coordenadas (A-L abajo, 1-8 a la izquierda dentro de cada casilla del borde)
 	for c in range(R.W):
-		draw_string(font, Vector2(c * S + S - 14, R.H * S - 4), R.COLS[c], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0, 0, 0, 0.55))
+		draw_string_outline(font, Vector2(c * S + S - 14, R.H * S - 4), R.COLS[c], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(1, 1, 1, 0.5))
+		draw_string(font, Vector2(c * S + S - 14, R.H * S - 4), R.COLS[c], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0, 0, 0, 0.7))
 	for r in range(1, R.H + 1):
-		draw_string(font, Vector2(2, (R.H - r) * S + S / 2.0 + 4), str(r), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0, 0, 0, 0.55))
+		draw_string_outline(font, Vector2(2, (R.H - r) * S + S / 2.0 + 4), str(r), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 3, Color(1, 1, 1, 0.5))
+		draw_string(font, Vector2(2, (R.H - r) * S + S / 2.0 + 4), str(r), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0, 0, 0, 0.7))
 	# progreso de captura
 	for p in game.capture:
 		var c: Array = game.capture[p]
 		var rect := cell_rect(p)
 		draw_rect(Rect2(rect.position + Vector2(6, S - 10), Vector2((S - 12) * c[2] / 4.0, 6)), SIDE_COLOR[c[0]])
-	# torretas
+	# torretas: la de una plaza va en la esquina del edificio; las de las cartas ocupan la casilla
 	for q in game.turrets:
 		var t: Dictionary = game.turrets[q]
 		var rect := cell_rect(q)
-		var col: Color = NEUTRAL if t.owner < 0 else SIDE_COLOR[t.owner]
-		if t.hp <= 0:
-			col = Color(0.3, 0.3, 0.3)
+		var tt: Texture2D = Art.tex("torretas/destruida") if t.hp <= 0 else \
+			Art.tex("torretas/%s_%s" % [Art.side_name(t.owner), Art.TURRET_FILE[t.kind]])
 		var off: bool = game.turn <= t.off
-		var center := rect.position + Vector2(S - 16, 16)
-		draw_circle(center, 13, Color(0.15, 0.15, 0.15))
-		draw_circle(center, 10, col.darkened(0.5) if off else col)
-		draw_string(font, center + Vector2(-10, 5), str(t.hp), HORIZONTAL_ALIGNMENT_CENTER, 20, 13, Color.BLACK)
+		var tr := Rect2(rect.position + Vector2(S * 0.28, -S * 0.12), Vector2(S * 0.62, S * 0.62)) if t.kind == "plaza" \
+			else rect.grow(-S * 0.04)
+		if tt != null:
+			draw_texture_rect(tt, tr, false, Color(0.55, 0.6, 0.9) if off else Color.WHITE)
+		var center := rect.position + Vector2(S - 10, 10)
+		draw_circle(center, 10, Color(0.1, 0.1, 0.1, 0.85))
+		draw_string(font, center + Vector2(-10, 5), str(t.hp), HORIZONTAL_ALIGNMENT_CENTER, 20, 12, Color.WHITE)
 	# resaltados
 	for p in marks:
 		draw_rect(cell_rect(p).grow(-2), marks[p], true)
@@ -110,33 +87,112 @@ func _draw() -> void:
 
 func _draw_unit(u: TWUnit, font: Font, c: Vector2) -> void:
 	var rect := Rect2(c - Vector2(S, S) / 2, Vector2(S, S))
-	var col: Color = SIDE_COLOR[u.side]
 	var dim := u.acted and game != null and u.side == game.current
-	if dim:
-		col = col.darkened(0.45)
-	var is_veh := R.VEHICLES.contains(u.t)
-	if is_veh:
-		var body := Rect2(c - Vector2(24, 20), Vector2(48, 40))
-		draw_rect(body, col)
-		draw_rect(body, Color.BLACK, false, 2)
+	var tex := Art.unit(u.t, u.side)
+	var size := S * 0.94
+	var r := Rect2(c - Vector2(size, size) / 2 + Vector2(0, -S * 0.03), Vector2(size, size))
+	if u.side == 1:                                    # Ámbar mira hacia la izquierda (hacia Jade)
+		r.size.x = -size                               # ancho negativo: Godot la voltea en el mismo sitio
+	draw_texture_rect(tex, r, false, Color(0.55, 0.55, 0.55) if dim else Color.WHITE)
+	# vida, tripulación, personaje y estados, encima del dibujo
+	var hp_pos := rect.position + Vector2(S - 20, S - 4)
+	draw_string_outline(font, hp_pos, str(u.hp), HORIZONTAL_ALIGNMENT_RIGHT, 18, 16, 5, Color.BLACK)
+	draw_string(font, hp_pos, str(u.hp), HORIZONTAL_ALIGNMENT_RIGHT, 18, 16, Color.WHITE)
+	if R.VEHICLES.contains(u.t):
+		var dot := rect.position + Vector2(8, S - 9)
 		if u.crew >= 0:
-			draw_circle(body.position + Vector2(8, 8), 4, Color.WHITE)
+			draw_circle(dot, 5, Color.BLACK)
+			draw_circle(dot, 3.5, Color.WHITE)
 		if u.char_id >= 0:
-			draw_circle(body.position + Vector2(18, 8), 4, Color("ffd84a"))
-	else:
-		draw_circle(c, 20, col)
-		draw_arc(c, 20, 0, TAU, 32, Color.BLACK, 2)
-	draw_string(font, c + Vector2(-24, 6), UNIT_LABEL.get(u.t, u.t), HORIZONTAL_ALIGNMENT_CENTER, 48, 18, Color.BLACK)
-	draw_string(font, rect.position + Vector2(S - 22, S - 6), str(u.hp), HORIZONTAL_ALIGNMENT_RIGHT, 18, 14, Color.WHITE)
+			draw_circle(dot + Vector2(12, 0), 5, Color.BLACK)
+			draw_circle(dot + Vector2(12, 0), 3.5, Color("ffd84a"))
 	if u.veteran:
-		draw_string(font, rect.position + Vector2(4, S - 6), "V", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("ffd84a"))
+		draw_string_outline(font, rect.position + Vector2(4, 16), "V", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, 4, Color.BLACK)
+		draw_string(font, rect.position + Vector2(4, 16), "V", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("ffd84a"))
 	if game != null and u.stun >= game.turn:
-		draw_string(font, rect.position + Vector2(4, 30), "PEM", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.WHITE)
+		draw_string_outline(font, rect.position + Vector2(4, 34), "PEM", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color.BLACK)
+		draw_string(font, rect.position + Vector2(4, 34), "PEM", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8fd3ff"))
 	if u.training != null:
-		draw_string(font, rect.position + Vector2(4, 30), "↑" + u.training[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+		draw_string_outline(font, rect.position + Vector2(4, 34), "↑" + u.training[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color.BLACK)
+		draw_string(font, rect.position + Vector2(4, 34), "↑" + u.training[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
 	if u.id == selected:
 		draw_rect(rect.grow(-1), Color.WHITE, false, 3)
 
+
+# ------------------------------------------------------------------ terreno con arte
+func _at(p: Vector2i) -> String:
+	return game.terrain.get(p, "")
+
+
+## Bits de los vecinos (N=1, E=2, S=4, O=8) cuyo terreno está en chars.
+func _mask(p: Vector2i, chars: String) -> int:
+	var m := 0
+	for d in [[Vector2i(0, 1), 1], [Vector2i(1, 0), 2], [Vector2i(0, -1), 4], [Vector2i(-1, 0), 8]]:
+		var ch := _at(p + d[0])
+		if ch != "" and chars.contains(ch):
+			m |= d[1]
+	return m
+
+
+## Capas de terreno de una casilla (de abajo arriba): llanura y, encima, el elemento del terreno.
+func terrain_layers(p: Vector2i) -> Array:
+	var ch := _at(p)
+	if ch == "O":
+		ch = game.turrets[p].base if game.turrets.has(p) else "."
+	var plain: Texture2D = Art.tex("terreno/llanura_2" if (p.x * 7 + p.y * 3) % 5 == 0 else "terreno/llanura")
+	match ch:
+		"B":
+			return [Art.tex("terreno/bosque")]
+		"C":
+			return [Art.tex("terreno/colina")]
+		"#":
+			return [Art.tex("terreno/muro")]
+		"r":
+			return [Art.tex("terreno/ruinas")]
+		"X":
+			return [plain, Art.tex("terreno/barricada")]
+		"=":
+			var m := _mask(p, "=PHQU")
+			if m in [0, 2, 8]:                         # aislado o final: tramo recto
+				m = 10
+			elif m in [1, 4]:
+				m = 5
+			return [Art.tex("terreno/camino_%d" % m)]
+		"~", "P":
+			var layers := [_water_tex(p)]
+			if ch == "P":
+				layers.append(Art.tex("terreno/puente_v" if _bridge_vertical(p) else "terreno/puente_h"))
+			return layers
+	return [plain]
+
+
+## Agua: cuarto de lago si la casilla forma parte de un bloque de 2×2; si no, la pieza de río.
+func _water_tex(p: Vector2i) -> Texture2D:
+	var m := _mask(p, "~P")
+	for c in [[1 | 2, Vector2i(1, 1), "ne"], [2 | 4, Vector2i(1, -1), "se"], [4 | 8, Vector2i(-1, -1), "so"], [8 | 1, Vector2i(-1, 1), "no"]]:
+		if m & c[0] == c[0] and "~P".contains(_at(p + c[1])) and _at(p + c[1]) != "":
+			return Art.tex("terreno/lago_" + c[2])
+	return Art.tex("terreno/rio_%d" % m)
+
+
+## La pasarela va en el eje con menos agua alrededor (si empatan, en el del camino).
+func _bridge_vertical(p: Vector2i) -> bool:
+	var dry := func(q: Vector2i) -> int:
+		var ch := _at(q)
+		return 0 if ch == "" or "~P".contains(ch) else (2 if ch == "=" else 1)
+	var v: int = dry.call(p + Vector2i(0, 1)) + dry.call(p + Vector2i(0, -1))
+	var h: int = dry.call(p + Vector2i(1, 0)) + dry.call(p + Vector2i(-1, 0))
+	return v >= h
+
+
+func _building_tex(p: Vector2i) -> Texture2D:
+	var o: int = game.owner[p]
+	var kind: String = {"H": "cg", "Q": "cuartel", "U": "ciudad"}.get(game.terrain[p], "ciudad")
+	if kind == "ciudad" and game.turrets.has(p) and game.turrets[p].kind == "plaza":
+		kind = "plaza"
+	if o < 0 and kind in ["cg", "cuartel"]:
+		kind = "ciudad"
+	return Art.tex("edificios/%s_%s" % [Art.side_name(o), kind])
 
 
 # ------------------------------------------------------------------ animaciones
@@ -216,6 +272,27 @@ func ring(at: Vector2, col: Color, size := 1.0, dur := 0.5) -> void:
 	add_effect("ring", dur, {"at": at, "col": col, "size": size})
 
 
+## Dibuja el fotograma que toca de una hoja de animación horizontal (fotogramas cuadrados).
+func _sheet(path: String, frames: int, p: float, at: Vector2, size: float) -> bool:
+	var t := Art.tex(path)
+	if t == null:
+		return false
+	var f := mini(frames - 1, int(p * frames))
+	var fw := t.get_width() / frames
+	draw_texture_rect_region(t, Rect2(at - Vector2(size, size) / 2, Vector2(size, size)), Rect2(f * fw, 0, fw, t.get_height()))
+	return true
+
+
+## Bandera del bando que aparece al completar una captura.
+func flag(at: Vector2, side: int) -> void:
+	add_effect("flag", 0.9, {"at": at, "side": Art.SIDE[side]})
+
+
+## Onda del PEM sobre la zona (size en casillas).
+func pem(at: Vector2, size := 1.6) -> void:
+	add_effect("pem", 0.6, {"at": at, "size": size})
+
+
 func _draw_effects(font: Font) -> void:
 	var now := Time.get_ticks_msec()
 	for e in effects:
@@ -224,23 +301,44 @@ func _draw_effects(font: Font) -> void:
 			"shot":
 				var head: Vector2 = e.a.lerp(e.b, p)
 				var tail: Vector2 = e.a.lerp(e.b, maxf(0.0, p - 0.25))
-				draw_line(tail, head, Color(e.col, 0.7), 4)
-				draw_circle(head, 6, e.col)
+				draw_line(tail, head, Color(e.col, 0.5), 3)
+				var pt := Art.tex("efectos/proyectil")
+				if pt != null:
+					draw_set_transform(head, (e.b - e.a).angle(), Vector2.ONE)
+					draw_texture_rect(pt, Rect2(Vector2(-S * 0.45, -S * 0.22), Vector2(S * 0.6, S * 0.44)), false, e.col.lightened(0.3))
+					draw_set_transform(Vector2.ZERO)
+				else:
+					draw_circle(head, 6, e.col)
 			"flash":
-				draw_circle(e.at, 10 + 26 * p, Color(1, 1, 0.85, 0.8 * (1.0 - p)))
+				if not _sheet("efectos/impacto", 4, p, e.at, S * 0.9):
+					draw_circle(e.at, 10 + 26 * p, Color(1, 1, 0.85, 0.8 * (1.0 - p)))
 			"bomb":
 				var y := lerpf(e.at.y - S * 2.5, e.at.y, p * p)
-				draw_circle(Vector2(e.at.x, y), 9, Color("2b2b2b"))
-				draw_circle(Vector2(e.at.x, y - 10), 4, Color("ff9a3c"))
+				var bt := Art.tex("efectos/bomba")
+				if bt != null:
+					draw_texture_rect(bt, Rect2(Vector2(e.at.x - S * 0.3, y - S * 0.45), Vector2(S * 0.6, S * 0.6)), false)
+				else:
+					draw_circle(Vector2(e.at.x, y), 9, Color("2b2b2b"))
+			"flag":
+				var ft := Art.tex("efectos/bandera_" + e.side)
+				var k := minf(1.0, p * 4.0)
+				var a := 1.0 - maxf(0.0, p - 0.75) / 0.25
+				if ft != null:
+					var sz: float = S * 0.8 * k
+					draw_texture_rect(ft, Rect2(e.at - Vector2(sz * 0.35, sz * 0.95), Vector2(sz, sz)), false, Color(1, 1, 1, a))
+			"pem":
+				var pm := Art.tex("efectos/pem")
+				var sz: float = S * (0.6 + 2.6 * e.size * p / 1.6)
+				if pm != null:
+					draw_texture_rect(pm, Rect2(e.at - Vector2(sz, sz) / 2, Vector2(sz, sz)), false, Color(1, 1, 1, 1.0 - p * p))
 			"number":
 				var pos: Vector2 = e.at + Vector2(-30, -10 - 34 * p)
 				var col := Color(e.col, 1.0 - maxf(0.0, p - 0.6) / 0.4)
 				draw_string_outline(font, pos, e.text, HORIZONTAL_ALIGNMENT_CENTER, 60, 26, 6, Color(0, 0, 0, col.a))
 				draw_string(font, pos, e.text, HORIZONTAL_ALIGNMENT_CENTER, 60, 26, col)
 			"boom":
-				draw_circle(e.at, 8 + 34 * p, Color(1.0, 0.55, 0.1, 0.85 * (1.0 - p)))
-				draw_circle(e.at, 4 + 20 * p, Color(1.0, 0.9, 0.4, 0.9 * (1.0 - p)))
-				draw_arc(e.at, 12 + 40 * p, 0, TAU, 32, Color(0.25, 0.25, 0.25, 0.6 * (1.0 - p)), 5)
+				if not _sheet("efectos/explosion", 8, p, e.at, S * 1.6):
+					draw_circle(e.at, 8 + 34 * p, Color(1.0, 0.55, 0.1, 0.85 * (1.0 - p)))
 			"ring":
 				var r: float = S * 0.3 + S * 0.55 * e.size * p
 				draw_arc(e.at, r, 0, TAU, 48, Color(e.col, 1.0 - p), 6)

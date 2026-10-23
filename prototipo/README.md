@@ -18,6 +18,8 @@ hacker, evolución de la tripulación, economía, escalada de PM, límites, domi
 | `ui/board_view.gd` | Dibujo del tablero, las unidades, las torretas y los resaltados. |
 | `ui/board_camera.gd` | Cámara del tablero: arrastrar, ampliar con dos dedos o la rueda, centrar en una casilla. |
 | `ui/sfx.gd` | Efectos de sonido generados por código (sin archivos de audio). |
+| `ui/art.gd` | Carga del arte (`assets/arte/`): unidades, terreno, edificios, torretas, efectos, cartas e interfaz. |
+| `assets/arte/` | Arte del juego, preparado con `../arte/preparar_arte.py` a partir de los 83 archivos entregados. |
 | `tests/run_golden.gd` | Pruebas: vuelve a jugar partidas del simulador y compara el estado turno a turno. |
 | `tests/golden/` | 24 partidas de referencia exportadas con `tactic_wars_sim/export_golden.py`. |
 | `tests/run_bots.gd`, `tests/bot_golden/` | Pruebas de la IA: 24 partidas bot contra bot que deben salir idénticas a las de Python. |
@@ -87,10 +89,29 @@ godot --path . -- --setup-test=setup --shot=p.png    # captura de la pantalla de
 
 Las opciones `--demo`, `--autoplay` y `--select` empiezan una partida rápida con ejércitos fijos, sin preparación.
 
+## Arte
+
+El tablero se dibuja con el arte de `assets/arte/`:
+
+- **Terreno por piezas.** Cada casilla elige su imagen según sus vecinas: 16 piezas de camino y 16 de río
+  (N=1, E=2, S=4, O=8), cuartos de lago para las zonas de agua de 2×2 y la pasarela del puente encima.
+  Si el terreno cambia en la partida (muro destruido, puente volado, barricada), la casilla se redibuja.
+- **Edificios** con el color de su dueño (la plaza, con su torreta en la esquina), **torretas** de las
+  cartas sobre la casilla y la torreta destruida.
+- **Unidades** de Jade mirando a la derecha y de Ámbar volteadas hacia la izquierda; encima, la vida, los
+  puntos de tripulación (blanco) y personaje (amarillo), veterano, PEM y evolución.
+- **Efectos** de las animaciones: proyectil, impacto, explosión, bomba, onda del PEM y bandera de captura.
+- **Interfaz:** ilustración en cada carta, iconos de unidad en la preparación y el despliegue, logo, fondo
+  de la preparación, carteles de victoria y derrota, e icono de la app.
+
+Para cambiar o añadir arte: deja los archivos con sus nombres en una carpeta como la de la entrega
+(`01_ASSETS_PARA_CLAUDE`) y ejecuta `python3 ../arte/preparar_arte.py <carpeta> assets/arte`.
+
 ## Pendiente
 
-1. Arte definitivo (ahora son formas y letras) y música.
-2. Ajustes tras probar en el móvil: tamaño de la vista, velocidad de las animaciones.
+1. Arte: las 10 cartas como ilustraciones individuales a 512×768 (ahora son recortes de una lámina) y la
+   artillería de Ámbar con la misma forma que la de Jade. Música.
+2. Ajustes tras probar en el móvil.
 
 ## Exportar a Android
 

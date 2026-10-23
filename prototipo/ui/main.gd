@@ -6,6 +6,7 @@ const R = preload("res://core/tw_rules.gd")
 const BoardView = preload("res://ui/board_view.gd")
 const SetupScreen = preload("res://ui/setup_screen.gd")
 const BoardCamera = preload("res://ui/board_camera.gd")
+const Art = preload("res://ui/art.gd")
 const Sfx = preload("res://ui/sfx.gd")
 const FONT := 21              # tamaño de letra base (legible en el móvil)
 const PANEL_W := 420
@@ -372,7 +373,11 @@ func _fill_cards() -> void:
 			var n := int(ceil((ready_turn - game.turn) / 2.0))
 			status = " · lista en %d ronda%s" % [n, "" if n == 1 else "s"]
 		b.text = "%s (%d PM)%s" % [R.CARD_NAMES[c], d[0], ("\n" + status.substr(3)) if status != "" else ""]
-		b.custom_minimum_size = Vector2(PANEL_W, 48)
+		b.custom_minimum_size = Vector2(PANEL_W, 76)
+		b.icon = Art.card(c)
+		b.expand_icon = true
+		b.add_theme_constant_override("icon_max_width", 40)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.disabled = not game.card_available(c) or game.winner != TWGame.NO_WINNER or not _is_human(game.current)
 		b.pressed.connect(_start_card.bind(c))
 		cards_box.add_child(b)
@@ -597,14 +602,17 @@ func _animate(a: Dictionary, evs: Array, pre: Dictionary, path: Array) -> void:
 			"capture":
 				sfx.play("capture")
 				board.ring(board.center(e[2]), BoardView.SIDE_COLOR[e[1]], 1.2, 0.6)
+				board.flag(board.center(e[2]), e[1])
 				board.number(board.center(e[2]), "¡Capturado!", BoardView.SIDE_COLOR[e[1]].lightened(0.4))
 				await board.wait(0.4)
 			"card":
 				sfx.play("card")
 				var c: String = e[2]
 				var col: Color = Color("6fb7ff") if c in ["pem", "hackeo"] else (Color("ff9a3c") if c in ["aereo", "saturacion"] else BoardView.SIDE_COLOR[e[1]])
-				if e[3] != null:
-					board.ring(board.center(e[3]), col, 1.6 if c in ["pem", "saturacion", "aereo"] else 1.0, 0.5)
+				if e[3] != null and c == "pem":
+					board.pem(board.center(e[3]))
+				elif e[3] != null:
+					board.ring(board.center(e[3]), col, 1.6 if c in ["saturacion", "aereo"] else 1.0, 0.5)
 				await board.wait(0.35)
 	for id in ejected:
 		board.hidden_units.erase(id)
@@ -793,6 +801,19 @@ func _show_winner() -> void:
 	for c in overlay_box.get_children():
 		c.queue_free()
 	var vb := VBoxContainer.new()
+	var banner := TextureRect.new()
+	banner.texture = Art.tex("ui/victoria" if game.winner >= 0 else "ui/derrota")
+	banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	banner.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	banner.custom_minimum_size = Vector2(560, 180)
+	vb.add_child(banner)
+	if game.winner >= 0:
+		var flag := TextureRect.new()
+		flag.texture = Art.tex("retratos/%s_personaje" % Art.SIDE[game.winner])
+		flag.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		flag.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		flag.custom_minimum_size = Vector2(560, 150)
+		vb.add_child(flag)
 	var l := Label.new()
 	l.add_theme_font_size_override("font_size", FONT + 9)
 	var how := {"dominio": "por dominio", "captura_CG": "capturando el cuartel general", "eliminacion": "por eliminación",
@@ -857,6 +878,12 @@ func _pass_screen(text: String, next: Callable) -> void:
 	vb.custom_minimum_size = Vector2(600, 0)
 	vb.add_theme_constant_override("separation", 20)
 	center.add_child(vb)
+	var logo := TextureRect.new()
+	logo.texture = Art.tex("ui/logo")
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.custom_minimum_size = Vector2(600, 220)
+	vb.add_child(logo)
 	var l := Label.new()
 	l.text = text
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -955,6 +982,10 @@ func _refresh_deploy() -> void:
 		var where: String = "" if dep_cells[i] == null else " — " + R.cell_name(dep_cells[i])
 		var b := Button.new()
 		b.text = _unit_label(army[i]) + where
+		b.icon = Art.unit(army[i][0], dep_side)
+		b.expand_icon = true
+		b.add_theme_constant_override("icon_max_width", 40)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.toggle_mode = true
 		SetupScreen.style_toggle(b, BoardView.SIDE_COLOR[dep_side])
 		b.button_pressed = i == dep_sel

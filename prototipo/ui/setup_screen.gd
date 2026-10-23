@@ -5,6 +5,7 @@ extends Control
 signal done(army: Array, deck: Array, vs_ai: bool, clock: bool)
 
 const R = preload("res://core/tw_rules.gd")
+const Art = preload("res://ui/art.gd")
 const SIDE_NAME := ["Brigada Jade", "Legión Ámbar"]
 const SIDE_COLOR := [Color("2fa36b"), Color("e39b2d")]
 const VEHICLE_TYPES := ["T", "J", "R"]
@@ -152,6 +153,13 @@ func _build(first: int) -> void:
 	bg.color = Color("1e2328")
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	var art_bg := TextureRect.new()                   # fondo de sala de mando, muy atenuado
+	art_bg.texture = Art.tex("ui/fondo_preparacion")
+	art_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	art_bg.modulate = Color(1, 1, 1, 0.25)
+	add_child(art_bg)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for k in ["left", "right", "top", "bottom"]:
@@ -165,7 +173,14 @@ func _build(first: int) -> void:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
 	root.add_child(head)
+	var logo := TextureRect.new()
+	logo.texture = Art.tex("ui/logo")
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.custom_minimum_size = Vector2(120, 52)
+	head.add_child(logo)
 	var title := _label("Preparación · " + SIDE_NAME[side], 28, SIDE_COLOR[side])
+	title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(title)
 	var draw := _label("Empieza: " + SIDE_NAME[first].split(" ")[1] + " (sorteo)", 19, Color("c8c8c8"))
 	draw.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -241,8 +256,11 @@ func _build(first: int) -> void:
 	for c in R.CARDS:
 		var d: Array = R.CARDS[c]
 		var b := _button("%s · %d PM · ronda %d+ · recarga %d\n%s" % [R.CARD_NAMES[c], d[0], d[2], d[1],
-			_wrap(CARD_TEXT[c], 58)], _on_card.bind(c), Vector2(0, 0))
+			_wrap(CARD_TEXT[c], 54)], _on_card.bind(c), Vector2(0, 0))
 		_toggle(b)
+		b.icon = Art.card(c)
+		b.expand_icon = true
+		b.add_theme_constant_override("icon_max_width", 56)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.add_theme_font_size_override("font_size", 17)
@@ -275,6 +293,13 @@ func _count_row(t: String) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	var u: Array = R.UNIT[t]
+	var icon := TextureRect.new()
+	icon.texture = Art.unit(t, side)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size = Vector2(52, 52)
+	icon.flip_h = side == 1
+	row.add_child(icon)
 	var name := _label(R.NAMES[t], 21)
 	name.custom_minimum_size = Vector2(160, 0)
 	name.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -370,7 +395,10 @@ func _update() -> void:
 		c.queue_free()
 	for t in VEHICLE_TYPES:
 		if counts[t] > 0:
-			var b := _toggle(_button(R.NAMES[t], _set_hero.bind(t), Vector2(160, 52)))
+			var b := _toggle(_button(R.NAMES[t], _set_hero.bind(t), Vector2(170, 60)))
+			b.icon = Art.unit(t, side)
+			b.expand_icon = true
+			b.add_theme_constant_override("icon_max_width", 44)
 			b.button_pressed = t == hero
 			hero_box.add_child(b)
 	for c in card_buttons:
