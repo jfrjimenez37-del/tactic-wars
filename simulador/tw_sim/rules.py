@@ -11,8 +11,8 @@ import heapq
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-COLS = "ABCDEFGHIJKL"
-W, H = 12, 8
+COLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+W, H = 12, 8                    # tamaño del mapa en uso (build_terrain lo ajusta al del mapa)
 
 # Mitad inferior (filas 1-4) de cada mapa; la mitad superior se obtiene por rotacion de 180 grados (C1.4).
 # . llano  = carretera  B bosque  C colina  ~ rio  P puente  # muro  r ruinas  X barricada
@@ -108,11 +108,15 @@ class Config:
 
 
 def build_terrain(name):
+    """El mapa se da por su mitad de abajo; la de arriba es la misma girada 180°. Cualquier tamaño."""
+    global W, H
     bottom = MAPS[name]
-    rows = {r + 1: bottom[r] for r in range(4)}
-    for r in range(4):
-        rows[8 - r] = bottom[r][::-1]
-    return {(c, r): rows[r][c] for r in range(1, 9) for c in range(12)}
+    h, W = len(bottom), len(bottom[0])
+    H = 2 * h
+    rows = {r + 1: bottom[r] for r in range(h)}
+    for r in range(h):
+        rows[H - r] = bottom[r][::-1]
+    return {(c, r): rows[r][c] for r in range(1, H + 1) for c in range(W)}
 
 
 def neighbors(p):
@@ -189,7 +193,7 @@ class Game:
         self.hq = {0: hqs[0], 1: hqs[1]}
         for p, ch in self.terrain.items():
             if ch in "HQ":
-                self.owner[p] = 0 if p[0] < 6 else 1
+                self.owner[p] = 0 if p[0] < W // 2 else 1
         self.capture = {}              # casilla -> [lado, id unidad, puntos]
         self.supplies = [self.cfg.supplies_start] * 2   # C3.4
         self.dom_streak = [0, 0]
